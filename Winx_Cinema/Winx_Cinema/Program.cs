@@ -9,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddSwaggerGen();
+builder.Services.AddConnections();
+
 var connectionString = builder.Configuration.GetConnectionString("AppConnectionString");
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -21,6 +24,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {
