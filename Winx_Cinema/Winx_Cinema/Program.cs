@@ -11,6 +11,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddConnections();
+builder.Services.AddEndpointsApiExplorer();
 
 var connectionString = builder.Configuration.GetConnectionString("AppConnectionString");
 builder.Services.AddDbContext<AppDbContext>(options =>
