@@ -12,8 +12,8 @@ using Winx_Cinema.Data;
 namespace Winx_Cinema.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240425095635_initial-migration")]
-    partial class initialmigration
+    [Migration("20240425095635_Initial-Migration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
