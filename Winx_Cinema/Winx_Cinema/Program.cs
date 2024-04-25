@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Winx_Cinema.Client.Pages;
 using Winx_Cinema.Components;
 using Winx_Cinema.Data;
 

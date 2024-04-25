@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 using Winx_Cinema.Shared.Entities;
 
 namespace Winx_Cinema.Data
@@ -11,9 +10,9 @@ namespace Winx_Cinema.Data
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
-         
+
         }
-      
+
         public DbSet<Film> Films { get; set; }
         public DbSet<FilmResolution> FilmResolutions { get; set; }
         public DbSet<Hall> Halls { get; set; }
