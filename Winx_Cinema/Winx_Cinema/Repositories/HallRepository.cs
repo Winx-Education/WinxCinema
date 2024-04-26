@@ -13,17 +13,17 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Hall>> GetHallsAsync() => await _context.Halls.ToListAsync();
+        public async Task<ICollection<Hall>> GetAll() => await _context.Halls.ToListAsync();
 
-        public async Task<Hall?> GetHallAsync(Guid id) => await _context.Halls.FirstOrDefaultAsync(h => h.Id == id);
+        public async Task<Hall?> Get(Guid id) => await _context.Halls.FirstOrDefaultAsync(h => h.Id == id);
 
-        public async Task AddHallAsync(Hall hall)
+        public async Task Add(Hall hall)
         {
             _context.Halls.Add(hall);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateHallAsync(Hall hall)
+        public async Task<bool> Update(Hall hall)
         {
             _context.Entry(hall).State = EntityState.Modified;
 
@@ -33,7 +33,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!HallExists(hall.Id))
+                if (!Exists(hall.Id))
                     return false;
                 throw;
             }
@@ -41,9 +41,9 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteHallAsync(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            var hall = await GetHallAsync(id);
+            var hall = await Get(id);
             if (hall == null)
                 return false;
 
@@ -53,6 +53,6 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public bool HallExists(Guid id) => _context.Halls.Any(h => h.Id == id);
+        public bool Exists(Guid id) => _context.Halls.Any(h => h.Id == id);
     }
 }

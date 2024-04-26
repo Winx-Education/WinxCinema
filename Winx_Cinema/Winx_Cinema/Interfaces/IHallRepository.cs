@@ -4,11 +4,11 @@ namespace Winx_Cinema.Interfaces
 {
     public interface IHallRepository
     {
-        Task<ICollection<Hall>> GetHallsAsync();
-        Task<Hall?> GetHallAsync(Guid id);
-        Task AddHallAsync(Hall hall);
-        Task<bool> UpdateHallAsync(Hall hall);
-        Task<bool> DeleteHallAsync(Guid id);
-        bool HallExists(Guid id);
+        Task<ICollection<Hall>> GetAll();
+        Task<Hall?> Get(Guid id);
+        Task Add(Hall hall);
+        Task<bool> Update(Hall hall);
+        Task<bool> Delete(Guid id);
+        bool Exists(Guid id);
     }
 }

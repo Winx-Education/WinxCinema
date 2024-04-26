@@ -13,11 +13,11 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<FilmResolution>> GetFilmResolutionsAsync() => await _context.FilmResolutions.ToListAsync();
+        public async Task<ICollection<FilmResolution>> GetAll() => await _context.FilmResolutions.ToListAsync();
 
-        public async Task<FilmResolution?> GetFilmResolutionAsync(Guid id) => await _context.FilmResolutions.FirstOrDefaultAsync(fr => fr.Id == id);
+        public async Task<FilmResolution?> Get(Guid id) => await _context.FilmResolutions.FirstOrDefaultAsync(fr => fr.Id == id);
 
-        public async Task<ICollection<FilmResolution>?> GetFilmResolutionsByFilmIdAsync(Guid filmId)
+        public async Task<ICollection<FilmResolution>?> GetAllByFilmId(Guid filmId)
         {
             var film = await _context.Films.Where(f => f.Id == filmId)
                 .Include(f => f.FilmResolutions).FirstOrDefaultAsync();
@@ -25,7 +25,7 @@ namespace Winx_Cinema.Repositories
             return film?.FilmResolutions;
         }
 
-        public async Task<bool> AddFilmResolutionAsync(Guid filmId, FilmResolution filmResolution)
+        public async Task<bool> Add(Guid filmId, FilmResolution filmResolution)
         {
             var film = await _context.Films.FirstOrDefaultAsync(f => f.Id == filmId);
 
@@ -39,7 +39,7 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> UpdateFilmResolutionAsync(FilmResolution filmResolution)
+        public async Task<bool> Update(FilmResolution filmResolution)
         {
             _context.Entry(filmResolution).State = EntityState.Modified;
 
@@ -49,7 +49,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FilmResolutionExists(filmResolution.Id))
+                if (!Exists(filmResolution.Id))
                     return false;
                 throw;
             }
@@ -57,9 +57,9 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteFilmResolutionAsync(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            var filmResolution = await GetFilmResolutionAsync(id);
+            var filmResolution = await Get(id);
             if (filmResolution == null)
                 return false;
 
@@ -69,6 +69,6 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public bool FilmResolutionExists(Guid id) => _context.FilmResolutions.Any(fr => fr.Id == id);
+        public bool Exists(Guid id) => _context.FilmResolutions.Any(fr => fr.Id == id);
     }
 }

@@ -13,11 +13,11 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Session>> GetSessionsAsync() => await _context.Sessions.ToListAsync();
+        public async Task<ICollection<Session>> GetAll() => await _context.Sessions.ToListAsync();
 
-        public async Task<Session?> GetSessionAsync(Guid id) => await _context.Sessions.FirstOrDefaultAsync(s => s.Id == id);
+        public async Task<Session?> Get(Guid id) => await _context.Sessions.FirstOrDefaultAsync(s => s.Id == id);
 
-        public async Task<ICollection<Session>?> GetSessionsByFilmResolutionIdAsync(Guid filmResId)
+        public async Task<ICollection<Session>?> GetAllByFilmResolutionId(Guid filmResId)
         {
             var filmResolution = await _context.FilmResolutions.Where(fr => fr.Id == filmResId)
                 .Include(fr => fr.Sessions).FirstOrDefaultAsync();
@@ -25,7 +25,7 @@ namespace Winx_Cinema.Repositories
             return filmResolution?.Sessions;
         }
 
-        public async Task<bool> AddSessionAsync(Guid filmResId, Guid hallId, Session session)
+        public async Task<bool> Add(Guid filmResId, Guid hallId, Session session)
         {
             var filmResolution = await _context.FilmResolutions.FirstOrDefaultAsync(f => f.Id == filmResId);
 
@@ -45,7 +45,7 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> UpdateSessionAsync(Session session)
+        public async Task<bool> Update(Session session)
         {
             _context.Entry(session).State = EntityState.Modified;
 
@@ -55,7 +55,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!SessionExists(session.Id))
+                if (!Exists(session.Id))
                     return false;
                 throw;
             }
@@ -63,9 +63,9 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteSessionAsync(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            var session = await GetSessionAsync(id);
+            var session = await Get(id);
             if (session == null)
                 return false;
 
@@ -75,6 +75,6 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public bool SessionExists(Guid id) => _context.Sessions.Any(s => s.Id == id);
+        public bool Exists(Guid id) => _context.Sessions.Any(s => s.Id == id);
     }
 }

@@ -13,11 +13,11 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Ticket>> GetTicketsAsync() => await _context.Tickets.ToListAsync();
+        public async Task<ICollection<Ticket>> GetAll() => await _context.Tickets.ToListAsync();
 
-        public async Task<Ticket?> GetTicketAsync(Guid id) => await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+        public async Task<Ticket?> Get(Guid id) => await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
 
-        public async Task<ICollection<Ticket>?> GetTicketsBySessionIdAsync(Guid sessionId)
+        public async Task<ICollection<Ticket>?> GetAllBySessionId(Guid sessionId)
         {
             var session = await _context.Sessions.Where(s => s.Id == sessionId)
                 .Include(s => s.Tickets).FirstOrDefaultAsync();
@@ -25,7 +25,7 @@ namespace Winx_Cinema.Repositories
             return session?.Tickets;
         }
 
-        public async Task<ICollection<Ticket>?> GetTicketsByUserIdAsync(string userId)
+        public async Task<ICollection<Ticket>?> GetAllByUserId(string userId)
         {
             var user = await _context.Users.Where(u => u.Id == userId)
                 .Include(u => u.Tickets).FirstOrDefaultAsync();
@@ -33,7 +33,7 @@ namespace Winx_Cinema.Repositories
             return user?.Tickets;
         }
 
-        public async Task<bool> AddTicketAsync(Guid sessionId, string userId, Ticket ticket)
+        public async Task<bool> Add(Guid sessionId, string userId, Ticket ticket)
         {
             var session = await _context.Sessions.FirstOrDefaultAsync(s => s.Id == sessionId);
 
@@ -53,7 +53,7 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> UpdateTicketAsync(Ticket ticket)
+        public async Task<bool> Update(Ticket ticket)
         {
             _context.Entry(ticket).State = EntityState.Modified;
 
@@ -63,7 +63,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TicketExists(ticket.Id))
+                if (!Exists(ticket.Id))
                     return false;
                 throw;
             }
@@ -71,9 +71,9 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteTicketAsync(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            var ticket = await GetTicketAsync(id);
+            var ticket = await Get(id);
             if (ticket == null)
                 return false;
 
@@ -83,6 +83,6 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public bool TicketExists(Guid id) => _context.Tickets.Any(t => t.Id == id);
+        public bool Exists(Guid id) => _context.Tickets.Any(t => t.Id == id);
     }
 }

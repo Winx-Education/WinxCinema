@@ -13,17 +13,17 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Film>> GetFilmsAsync() => await _context.Films.ToListAsync();
+        public async Task<ICollection<Film>> GetAll() => await _context.Films.ToListAsync();
 
-        public async Task<Film?> GetFilmAsync(Guid id) => await _context.Films.FirstOrDefaultAsync(f => f.Id == id);
+        public async Task<Film?> Get(Guid id) => await _context.Films.FirstOrDefaultAsync(f => f.Id == id);
 
-        public async Task AddFilmAsync(Film film)
+        public async Task Add(Film film)
         {
             _context.Films.Add(film);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateFilmAsync(Film film)
+        public async Task<bool> Update(Film film)
         {
             _context.Entry(film).State = EntityState.Modified;
 
@@ -33,7 +33,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FilmExists(film.Id))
+                if (!Exists(film.Id))
                     return false;
                 throw;
             }
@@ -41,9 +41,9 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteFilmAsync(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            var film = await GetFilmAsync(id);
+            var film = await Get(id);
             if (film == null)
                 return false;
 
@@ -53,6 +53,6 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public bool FilmExists(Guid id) => _context.Films.Any(f => f.Id == id);
+        public bool Exists(Guid id) => _context.Films.Any(f => f.Id == id);
     }
 }

@@ -13,17 +13,17 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<User>> GetUsersAsync() => await _context.Users.ToListAsync();
+        public async Task<ICollection<User>> GetAll() => await _context.Users.ToListAsync();
 
-        public async Task<User?> GetUserAsync(string id) => await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        public async Task<User?> Get(string id) => await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
-        public async Task AddUserAsync(User user)
+        public async Task Add(User user)
         {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateUserAsync(User user)
+        public async Task<bool> Update(User user)
         {
             _context.Entry(user).State = EntityState.Modified;
 
@@ -33,7 +33,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(user.Id))
+                if (!Exists(user.Id))
                     return false;
                 throw;
             }
@@ -41,9 +41,9 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteUserAsync(string id)
+        public async Task<bool> Delete(string id)
         {
-            var user = await GetUserAsync(id);
+            var user = await Get(id);
             if (user == null)
                 return false;
 
@@ -53,6 +53,6 @@ namespace Winx_Cinema.Repositories
             return true;
         }
 
-        public bool UserExists(string id) => _context.Users.Any(u => u.Id == id);
+        public bool Exists(string id) => _context.Users.Any(u => u.Id == id);
     }
 }
