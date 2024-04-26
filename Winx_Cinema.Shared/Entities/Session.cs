@@ -9,5 +9,6 @@
 
         public Hall Hall { get; set; }
         public FilmResolution FilmResolution { get; set; }
+        public ICollection<Ticket> Tickets { get; }
     }
 }
