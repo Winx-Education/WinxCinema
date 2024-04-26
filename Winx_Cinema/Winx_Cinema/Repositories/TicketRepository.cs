@@ -33,10 +33,24 @@ namespace Winx_Cinema.Repositories
             return user?.Tickets;
         }
 
-        public async Task AddTicketAsync(Ticket ticket)
+        public async Task<bool> AddTicketAsync(Guid sessionId, string userId, Ticket ticket)
         {
+            var session = await _context.Sessions.FirstOrDefaultAsync(s => s.Id == sessionId);
+
+            if (session == null)
+                return false;
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+                return false;
+
+            ticket.Session = session;
+            ticket.User = user;
+
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> UpdateTicketAsync(Ticket ticket)
@@ -49,7 +63,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Tickets.Any(t => t.Id == ticket.Id))
+                if (!TicketExists(ticket.Id))
                     return false;
                 throw;
             }
@@ -68,5 +82,7 @@ namespace Winx_Cinema.Repositories
 
             return true;
         }
+
+        public bool TicketExists(Guid id) => _context.Tickets.Any(t => t.Id == id);
     }
 }

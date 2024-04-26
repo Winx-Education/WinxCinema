@@ -8,8 +8,9 @@ namespace Winx_Cinema.Interfaces
         Task<Ticket?> GetTicketAsync(Guid id);
         Task<ICollection<Ticket>?> GetTicketsBySessionIdAsync(Guid sessionId);
         Task<ICollection<Ticket>?> GetTicketsByUserIdAsync(string userId);
-        Task AddTicketAsync(Ticket ticket);
+        Task<bool> AddTicketAsync(Guid sessionId, string userId, Ticket ticket);
         Task<bool> UpdateTicketAsync(Ticket ticket);
         Task<bool> DeleteTicketAsync(Guid id);
+        bool TicketExists(Guid id);
     }
 }

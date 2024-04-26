@@ -7,8 +7,9 @@ namespace Winx_Cinema.Interfaces
         Task<ICollection<Session>> GetSessionsAsync();
         Task<Session?> GetSessionAsync(Guid id);
         Task<ICollection<Session>?> GetSessionsByFilmResolutionIdAsync(Guid filmResId);
-        Task AddSessionAsync(Session session);
+        Task<bool> AddSessionAsync(Guid filmResId, Guid hallId, Session session);
         Task<bool> UpdateSessionAsync(Session session);
         Task<bool> DeleteSessionAsync(Guid id);
+        bool SessionExists(Guid id);
     }
 }

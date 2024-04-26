@@ -9,5 +9,6 @@ namespace Winx_Cinema.Interfaces
         Task AddHallAsync(Hall hall);
         Task<bool> UpdateHallAsync(Hall hall);
         Task<bool> DeleteHallAsync(Guid id);
+        bool HallExists(Guid id);
     }
 }

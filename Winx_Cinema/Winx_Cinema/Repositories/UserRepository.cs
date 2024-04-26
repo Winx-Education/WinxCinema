@@ -33,7 +33,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Users.Any(u => u.Id == user.Id))
+                if (!UserExists(user.Id))
                     return false;
                 throw;
             }
@@ -52,5 +52,7 @@ namespace Winx_Cinema.Repositories
 
             return true;
         }
+
+        public bool UserExists(string id) => _context.Users.Any(u => u.Id == id);
     }
 }

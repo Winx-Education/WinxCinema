@@ -25,10 +25,18 @@ namespace Winx_Cinema.Repositories
             return film?.FilmResolutions;
         }
 
-        public async Task AddFilmResolutionAsync(FilmResolution filmResolution)
+        public async Task<bool> AddFilmResolutionAsync(Guid filmId, FilmResolution filmResolution)
         {
+            var film = await _context.Films.FirstOrDefaultAsync(f => f.Id == filmId);
+
+            if (film == null)
+                return false;
+
+            filmResolution.Film = film;
+
             _context.FilmResolutions.Add(filmResolution);
             await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> UpdateFilmResolutionAsync(FilmResolution filmResolution)
@@ -41,7 +49,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.FilmResolutions.Any(fr => fr.Id == filmResolution.Id))
+                if (!FilmResolutionExists(filmResolution.Id))
                     return false;
                 throw;
             }
@@ -60,5 +68,7 @@ namespace Winx_Cinema.Repositories
 
             return true;
         }
+
+        public bool FilmResolutionExists(Guid id) => _context.FilmResolutions.Any(fr => fr.Id == id);
     }
 }

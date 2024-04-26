@@ -9,5 +9,6 @@ namespace Winx_Cinema.Interfaces
         Task AddUserAsync(User user);
         Task<bool> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(string id);
+        bool UserExists(string id);
     }
 }

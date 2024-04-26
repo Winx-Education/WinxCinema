@@ -33,7 +33,7 @@ namespace Winx_Cinema.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Halls.Any(h => h.Id == hall.Id))
+                if (!HallExists(hall.Id))
                     return false;
                 throw;
             }
@@ -52,5 +52,7 @@ namespace Winx_Cinema.Repositories
 
             return true;
         }
+
+        public bool HallExists(Guid id) => _context.Halls.Any(h => h.Id == id);
     }
 }

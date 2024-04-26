@@ -9,5 +9,6 @@ namespace Winx_Cinema.Interfaces
         Task AddFilmAsync(Film film);
         Task<bool> UpdateFilmAsync(Film film);
         Task<bool> DeleteFilmAsync(Guid id);
+        bool FilmExists(Guid id);
     }
 }
