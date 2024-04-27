@@ -47,13 +47,18 @@ namespace Winx_Cinema.Repositories
 
         public async Task<bool> Update(Session session)
         {
-            _context.Entry(session).State = EntityState.Modified;
-
             try
             {
+                var oldSession = await _context.Sessions.FirstAsync(s => s.Id == session.Id);
+                _context.Entry(oldSession).State = EntityState.Detached;
+                session.HallId = oldSession.HallId;
+                session.FilmResolutionId = oldSession.FilmResolutionId;
+
+                _context.Entry(session).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex) when (ex is DbUpdateConcurrencyException || ex is InvalidOperationException)
             {
                 if (!Exists(session.Id))
                     return false;
