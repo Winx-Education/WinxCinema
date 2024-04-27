@@ -33,7 +33,6 @@ namespace Winx_Cinema.Repositories
                 return false;
 
             filmResolution.Film = film;
-            filmResolution.FilmId = film.Id;
 
             _context.FilmResolutions.Add(filmResolution);
             await _context.SaveChangesAsync();
