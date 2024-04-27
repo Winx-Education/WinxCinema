@@ -33,6 +33,7 @@ namespace Winx_Cinema.Repositories
                 return false;
 
             filmResolution.Film = film;
+            filmResolution.FilmId = film.Id;
 
             _context.FilmResolutions.Add(filmResolution);
             await _context.SaveChangesAsync();
@@ -41,13 +42,17 @@ namespace Winx_Cinema.Repositories
 
         public async Task<bool> Update(FilmResolution filmResolution)
         {
-            _context.Entry(filmResolution).State = EntityState.Modified;
-
             try
             {
+                var oldFilmRes = await _context.FilmResolutions.FirstAsync(fr => fr.Id == filmResolution.Id);
+                _context.Entry(oldFilmRes).State = EntityState.Detached;
+                filmResolution.FilmId = oldFilmRes.FilmId;
+
+                _context.Entry(filmResolution).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex) when (ex is DbUpdateConcurrencyException || ex is InvalidOperationException)
             {
                 if (!Exists(filmResolution.Id))
                     return false;

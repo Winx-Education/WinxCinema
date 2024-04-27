@@ -25,13 +25,28 @@ namespace Winx_Cinema.Repositories
 
         public async Task<bool> Update(User user)
         {
-            _context.Entry(user).State = EntityState.Modified;
-
             try
             {
+                var oldUser = await _context.Users.FirstAsync(u => u.Id == user.Id);
+                _context.Entry(oldUser).State = EntityState.Detached;
+                user.AccessFailedCount = oldUser.AccessFailedCount;
+                user.ConcurrencyStamp = oldUser.ConcurrencyStamp;
+                user.EmailConfirmed = oldUser.EmailConfirmed;
+                user.LockoutEnabled = oldUser.LockoutEnabled;
+                user.LockoutEnd = oldUser.LockoutEnd;
+                user.NormalizedEmail = oldUser.NormalizedEmail;
+                user.NormalizedUserName = oldUser.NormalizedUserName;
+                user.PasswordHash = oldUser.PasswordHash;
+                user.PhoneNumberConfirmed = oldUser.PhoneNumberConfirmed;
+                user.SecurityStamp = oldUser.SecurityStamp;
+                user.TwoFactorEnabled = oldUser.TwoFactorEnabled;
+                user.UserName = oldUser.UserName;
+
+                _context.Entry(user).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex) when (ex is DbUpdateConcurrencyException || ex is InvalidOperationException)
             {
                 if (!Exists(user.Id))
                     return false;
