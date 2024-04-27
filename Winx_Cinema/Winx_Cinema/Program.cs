@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Winx_Cinema.Components;
 using Winx_Cinema.Data;
+using Winx_Cinema.Interfaces;
+using Winx_Cinema.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddScoped<IFilmRepository, FilmRepository>();
+builder.Services.AddScoped<IFilmResolutionRepository, FilmResolutionRepository>();
+builder.Services.AddScoped<IHallRepository, HallRepository>();
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddSwaggerGen();
-builder.Services.AddConnections();
 builder.Services.AddEndpointsApiExplorer();
 
 var connectionString = builder.Configuration.GetConnectionString("AppConnectionString");
