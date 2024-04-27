@@ -6,5 +6,7 @@ namespace Winx_Cinema.Shared.Entities
     {
         public string FirstName { get; set; }
         public string SecondName { get; set; }
+
+        public ICollection<Ticket> Tickets { get; }
     }
 }

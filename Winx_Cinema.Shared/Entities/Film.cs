@@ -13,5 +13,7 @@
         public TimeSpan Duration { get; set; }
         public int Rating { get; set; }
         public DateTime ReleaseDate { get; set; }
+
+        public ICollection<FilmResolution> FilmResolutions { get; }
     }
 }

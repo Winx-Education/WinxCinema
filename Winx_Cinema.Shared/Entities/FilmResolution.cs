@@ -8,5 +8,6 @@
         public double Price { get; set; }
 
         public Film Film { get; set; }
+        public ICollection<Session> Sessions { get; }
     }
 }
