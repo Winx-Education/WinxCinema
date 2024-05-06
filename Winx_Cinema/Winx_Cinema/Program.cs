@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Winx_Cinema.Components;
 using Winx_Cinema.Data;
 using Winx_Cinema.Interfaces;
 using Winx_Cinema.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMudServices();
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
