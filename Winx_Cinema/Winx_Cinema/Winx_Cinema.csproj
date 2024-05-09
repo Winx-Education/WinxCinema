@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="6.19.1" />
     <ProjectReference Include="..\..\Winx_Cinema.Shared\Winx_Cinema.Shared.csproj" />
     <ProjectReference Include="..\Winx_Cinema.Client\Winx_Cinema.Client.csproj" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
