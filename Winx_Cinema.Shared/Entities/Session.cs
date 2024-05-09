@@ -7,8 +7,8 @@
         public Guid FilmResolutionId { get; set; }
         public DateTime StartTime { get; set; }
 
-        public Hall Hall { get; set; }
-        public FilmResolution FilmResolution { get; set; }
-        public ICollection<Ticket> Tickets { get; }
+        public Hall Hall { get; set; } = null!;
+        public FilmResolution FilmResolution { get; set; } = null!;
+        public ICollection<Ticket> Tickets { get; } = null!;
     }
 }

@@ -13,11 +13,11 @@ namespace Winx_Cinema.Data
 
         }
 
-        public DbSet<Film> Films { get; set; }
-        public DbSet<FilmResolution> FilmResolutions { get; set; }
-        public DbSet<Hall> Halls { get; set; }
-        public DbSet<Session> Sessions { get; set; }
-        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<Film> Films { get; set; } = null!;
+        public DbSet<FilmResolution> FilmResolutions { get; set; } = null!;
+        public DbSet<Hall> Halls { get; set; } = null!;
+        public DbSet<Session> Sessions { get; set; } = null!;
+        public DbSet<Ticket> Tickets { get; set; } = null!;
 
     }
 }
