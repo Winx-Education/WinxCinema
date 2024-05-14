@@ -1,0 +1,103 @@
+@page "/cinema/{Id}"
+@attribute [StreamRendering]
+
+@using Winx_Cinema.Shared.Entities
+@inject IHttpClientFactory httpClientFactory
+
+@switch (dataState)
+{
+    case DataState.Loading:
+        <MudText><em>Loading...</em></MudText>
+        break;
+    case DataState.Success:
+        <MudGrid>
+            <MudItem xs="9">
+                <h1>@film.Title</h1>
+                <h6><b>Film description:</b></h6>
+                <MudText Typo="Typo.body1">@film.Description</MudText>
+            </MudItem>
+            <MudItem xs="3">
+                <MudStack Spacing="3">
+                    <MudImage Class="mb-4" Src="images/placeholder.png" />
+                    <div>
+                        <MudText Typo="Typo.subtitle2">Rating</MudText>
+                        <MudText>@film.Rating</MudText>
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.subtitle2">Release date</MudText>
+                        <MudText>@film.ReleaseDate.ToString("dd/MM/yyyy")</MudText>
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.subtitle2">Genre</MudText>
+                        <MudText>@film.Genre</MudText>
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.subtitle2">Cast</MudText>
+                        <MudText>@film.Cast</MudText>
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.subtitle2">Director</MudText>
+                        <MudText>@film.Director</MudText>
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.subtitle2">Duration</MudText>
+                        <MudText>@film.Duration</MudText>
+                    </div>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+        break;
+    case DataState.Missing:
+        <MudText><em>Cinema was not found...</em></MudText>
+        break;
+    case DataState.Failed:
+        <MudText><em>Failed to load data</em></MudText>
+        break;
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+    private Film film = null!;
+    private DataState dataState = DataState.Loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id == null)
+        {
+            dataState = DataState.Failed;
+            return;
+        }
+
+        var client = httpClientFactory.CreateClient("localhost");
+        var response = await client.GetAsync($"api/films/{Id}");
+
+        switch (response.StatusCode)
+        {
+            case System.Net.HttpStatusCode.OK:
+                var result = await response.Content.ReadFromJsonAsync<Film>();
+                if (result == null)
+                {
+                    dataState = DataState.Failed;
+                    break;
+                }
+                film = result;
+                dataState = DataState.Success;
+                break;
+            case System.Net.HttpStatusCode.NotFound:
+                dataState = DataState.Missing;
+                break;
+            default:
+                dataState = DataState.Failed;
+                break;
+        }
+    }
+
+    private enum DataState
+    {
+        Loading,
+        Success,
+        Missing,
+        Failed
+    }
+}
