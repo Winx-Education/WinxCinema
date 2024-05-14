@@ -41,6 +41,7 @@ namespace Winx_Cinema.Controllers
         public async Task<IActionResult> PutFilm(Guid id, NewFilmDto dto)
         {
             var film = _mapper.Map<Film>(dto);
+            film.ReleaseDate = DateTime.SpecifyKind(film.ReleaseDate, DateTimeKind.Utc);
             film.Id = id;
 
             if (!await _repository.Update(film))
