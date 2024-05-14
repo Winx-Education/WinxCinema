@@ -1,3 +1,4 @@
+using Winx_Cinema.Shared.Dtos;
 using Winx_Cinema.Shared.Entities;
 
 namespace Winx_Cinema.Interfaces
@@ -6,7 +7,8 @@ namespace Winx_Cinema.Interfaces
     {
         Task<ICollection<User>> GetAll();
         Task<User?> Get(string id);
-        Task Add(User user);
+        Task CreateUser(NewUserDto user);
+        Task<LoginResponseDto> Login(LoginDto userDto);
         Task<bool> Update(User user);
         Task<bool> Delete(string id);
         bool Exists(string id);
