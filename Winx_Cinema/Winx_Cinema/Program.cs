@@ -15,14 +15,14 @@ NavigationManager navigationManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMudServices();
 // Add services to the container.
+builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddControllers();
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IFilmRepository, FilmRepository>();
 builder.Services.AddScoped<IFilmResolutionRepository, FilmResolutionRepository>();
 builder.Services.AddScoped<IHallRepository, HallRepository>();
