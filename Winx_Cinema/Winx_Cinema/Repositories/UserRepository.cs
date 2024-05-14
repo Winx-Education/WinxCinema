@@ -45,9 +45,11 @@ namespace Winx_Cinema.Repositories
 
             var token = GenerateJwtToken(user);
 
+            var newUser = mapper.Map<UserDto>(user);
+
             return new LoginResponseDto
             {
-                user = user,
+                user = newUser,
                 Token = token,
             };
         }

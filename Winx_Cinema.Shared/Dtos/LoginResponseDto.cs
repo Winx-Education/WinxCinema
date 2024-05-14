@@ -9,7 +9,7 @@ namespace Winx_Cinema.Shared.Dtos
 {
     public class LoginResponseDto
     {
-        public User user { get; set; }
+        public UserDto user { get; set; }
         public string Token { get; set; }
     }
 }
