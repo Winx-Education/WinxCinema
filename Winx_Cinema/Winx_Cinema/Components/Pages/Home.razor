@@ -1,7 +1,129 @@
 ﻿@page "/"
-
+@using Winx_Cinema.Shared.Dtos
+@rendermode InteractiveServer
+@inject IHttpClientFactory httpClientFactory
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<style>
+    .flip-card {
+        
+        width: 100%;
+        height: 100%;
+        perspective: 1000px;
+    }
 
-Welcome to your new app.
+    .flip-card-inner {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.9s;
+        transform-style: preserve-3d;
+    }
+
+    .flip-card:hover .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .flip-card-front,
+    .flip-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+    }
+
+    .flip-card-front {
+        background-color: #fff;
+    }
+
+    .flip-card-back {
+        
+        transform: rotateY(180deg);
+    }
+</style>
+<div class="row pb-3">
+    @foreach (var film in films)
+    {
+        <div class="col-lg-3 col-sm-6 mb-4">
+            <!-- Додав клас Bootstrap mb-4 для відступів між елементами -->
+            <div class="row p-2">
+                <div class="col-12 p-1">
+                    <div class="card   flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <img src="@film.PicturePath" class="card-img-top rounded" />
+                                <div class="card-body pb-0">
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-dark opacity-75 text-uppercase text-center">@film.Title</p>
+                                <p class="text-dark text-center">Genre: <span>@film.Genre</span></p>
+                                <p class="text-dark text-center">Director: <span>@film.Director</span></p>
+                                <p class="text-dark text-center">Rating: <span>@film.Rating</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@* <div class="row pb-3">
+    @foreach (var film in films)
+    {
+        <div class="col-lg-3 col-sm-6">
+            <div class="row p-2">
+                <div class="col-12 p-1">
+                    <div class="card border-0 p-3 shadow border-top border-5 rounded flip-card">
+                        <div class="flip-card-inner">
+                            <img src="@film.PicturePath" class="card-img-top rounded" />
+                            <div class="card-body pb-0 ">
+                                <div class="pl-1">
+                                    <p class="card-title h5 text-dark opacity-75 text-uppercase text-center">@film.Genre</p>
+                                    <p class="card-title text-warning text-center">by <b>@film.Director</b></p>
+                                </div>
+                                <div class="pl-1">
+                                    <p class="text-dark text-opacity-75 text-center mb-0">List Price: <span class="text-decoration-line-through"></span></p>
+                                </div>
+                                <div class="pl-1">
+                                    <p class="text-dark text-opacity-75 text-center">As low as: <span>@film.Duration</span></p>
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-dark opacity-75 text-uppercase text-center">@film.Title</p>
+                                <p class="text-dark text-center">Genre: <span>@film.Genre</span></p>
+                                <p class="text-dark text-center">Director: <span>@film.Director</span></p>
+                                <p class="text-dark text-center">Rating: <span>@film.Rating</span></p>
+                            </div>
+                            <div>
+                                <a asp-action="Details"
+                                   class="btn btn-primary bg-gradient border-0 form-control">
+                                    Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div> *@
+
+
+
+
+@code {
+    List<FilmDto> films = new List<FilmDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = httpClientFactory.CreateClient("localhost");
+        var result = await client.GetFromJsonAsync<List<FilmDto>>("api/Films");
+
+        if (result is not null)
+        {
+            films = result;
+        }
+        //films = await FilmService.GetFilms(); // Припустимо, що у вас є статичний метод GetFilms у вашому сервісі FilmService, який викликає метод контролера GetFilms
+    }
+}
