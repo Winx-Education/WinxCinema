@@ -49,14 +49,23 @@ namespace Winx_Cinema.Controllers
             return NoContent();
         }
 
+        [HttpPost]
+        [Route("login")]
+
+        public async Task<IActionResult> LoginUser(LoginDto model)
+        {
+            var result = await _repository.Login(model);
+
+            return Ok(result);
+        }
         // POST: api/Users
         [HttpPost]
+        [Route("register")]
         public async Task<ActionResult<UserDto>> PostUser(NewUserDto dto)
         {
-            var user = _mapper.Map<User>(dto);
-            await _repository.Add(user);
+            await _repository.CreateUser(dto);
 
-            return CreatedAtAction(nameof(GetUser), new { user?.Id }, _mapper.Map<UserDto>(user));
+            return Ok("Success");
         }
 
         // DELETE: api/Users/5
