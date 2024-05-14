@@ -21,6 +21,11 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddHttpClient("localhost", httpClient =>
+{
+    httpClient.BaseAddress = new Uri($"http://localhost{(builder.Environment.IsDevelopment() ? ":5163" : "")}");
+});
+
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IFilmRepository, FilmRepository>();
