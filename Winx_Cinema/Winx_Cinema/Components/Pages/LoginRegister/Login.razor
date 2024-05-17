@@ -30,11 +30,11 @@
 @code {
     bool success;
     string[] errors = { };
-    MudTextField<string> pwField1;
-    MudTextField<string> email;
-    string errorMessageforEmail = "";
-    string passwordIsNotCorrect = "";
-    MudForm form;
+    MudTextField<string> pwField1 = null!;
+    MudTextField<string> email = null!;
+    string errorMessageforEmail = string.Empty;
+    string passwordIsNotCorrect = string.Empty;
+    MudForm form = null!;
 
     private async Task onLogin()
     {
@@ -42,10 +42,10 @@
         {
             var client = httpClientFactory.CreateClient("localhost");
             var newUser = new LoginDto
-                {
-                    Password = pwField1.Value,
-                    Email = email.Value,
-                };
+            {
+                Password = pwField1.Value,
+                Email = email.Value,
+            };
 
             using StringContent jsonContent = new(
                 JsonSerializer.Serialize(newUser),
@@ -53,9 +53,12 @@
                 "application/json");
 
             var response = await client.PostAsync(
-                        "api/Users/login",
-                        jsonContent);
+                "api/Users/login",
+                jsonContent);
             var h = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+            if (h == null)
+                return;
+
             Console.WriteLine(h.Token);
             if (h.LoginResults == Shared.Enums.LoginRegisterResults.IncorrectEmail)
             {
@@ -63,7 +66,7 @@
             }
             else
             {
-                errorMessageforEmail = "";
+                errorMessageforEmail = string.Empty;
             }
             if (h.LoginResults == Shared.Enums.LoginRegisterResults.IncorrectPassword)
             {
@@ -71,7 +74,7 @@
             }
             else
             {
-                passwordIsNotCorrect = "";
+                passwordIsNotCorrect = string.Empty;
             }
         }
     }
