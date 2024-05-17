@@ -11,6 +11,7 @@ using Winx_Cinema.Data;
 using Winx_Cinema.Interfaces;
 using Winx_Cinema.Shared.Dtos;
 using Winx_Cinema.Shared.Entities;
+using Winx_Cinema.Shared.Enums;
 
 namespace Winx_Cinema.Repositories
 {
@@ -33,14 +34,24 @@ namespace Winx_Cinema.Repositories
             var user = await userManager.FindByEmailAsync(userDto.Email);
             if (user == null)
             {
-                return null;
+                return new LoginResponseDto
+                {
+                    user = null,
+                    Token = null,
+                    LoginResults = LoginRegisterResults.IncorrectEmail,
+                };
             }
 
             var result = await userManager.CheckPasswordAsync(user, userDto.Password);
 
             if (!result)
             {
-                return null;
+                return new LoginResponseDto
+                {
+                    user = null,
+                    Token = null,
+                    LoginResults = LoginRegisterResults.IncorrectPassword,
+                };
             }
 
             var token = GenerateJwtToken(user);
@@ -51,6 +62,7 @@ namespace Winx_Cinema.Repositories
             {
                 user = newUser,
                 Token = token,
+                LoginResults = LoginRegisterResults.Ok,
             };
         }
 
@@ -80,14 +92,21 @@ namespace Winx_Cinema.Repositories
 
         public async Task<User?> Get(string id) => await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
-        public async Task CreateUser(NewUserDto model)
+        public async Task<LoginRegisterResults> CreateUser(NewUserDto model)
         {
 
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user != null)
             {
-                return;
+                return LoginRegisterResults.EmailIsExist;
+            }
+
+            user = await userManager.FindByNameAsync(model.UserName);
+
+            if (user != null)
+            {
+                return LoginRegisterResults.UserNameIsExist;
             }
 
             user = new User()
@@ -101,9 +120,9 @@ namespace Winx_Cinema.Repositories
 
             if (result.Succeeded)
             {
-                return;
+                return LoginRegisterResults.Ok;
             }
-            return;
+            return LoginRegisterResults.SomethingWentWrong;
         }
 
         public async Task<bool> Update(User user)

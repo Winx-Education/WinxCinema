@@ -13,9 +13,12 @@
         <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
             <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
                           Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" @ref="email" />
+            <MudText class="text-danger">@errorMessageforEmail</MudText>
             <MudTextField T="string" Label="Password" @ref="pwField1"
                           InputType="InputType.Password"
+                          Required="true"
                           RequiredError="Password is required!" />
+            <MudText class="text-danger">@passwordIsNotCorrect</MudText>
             <div class="d-flex align-center justify-space-between">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" OnClick="onLogin" Class="ml-auto mt-2">Login</MudButton>
             </div>
@@ -29,7 +32,8 @@
     string[] errors = { };
     MudTextField<string> pwField1;
     MudTextField<string> email;
-
+    string errorMessageforEmail = "";
+    string passwordIsNotCorrect = "";
     MudForm form;
 
     private async Task onLogin()
@@ -52,7 +56,23 @@
                         "api/Users/login",
                         jsonContent);
             var h = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-                        Console.WriteLine(h.Token);
+            Console.WriteLine(h.Token);
+            if (h.LoginResults == Shared.Enums.LoginRegisterResults.IncorrectEmail)
+            {
+                errorMessageforEmail = "Email is incorrect";
+            }
+            else
+            {
+                errorMessageforEmail = "";
+            }
+            if (h.LoginResults == Shared.Enums.LoginRegisterResults.IncorrectPassword)
+            {
+                passwordIsNotCorrect = "Password is not correct";
+            }
+            else
+            {
+                passwordIsNotCorrect = "";
+            }
         }
     }
 
