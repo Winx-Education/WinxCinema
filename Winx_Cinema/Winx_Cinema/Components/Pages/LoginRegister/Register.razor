@@ -40,17 +40,17 @@
 @code {
     bool success;
     string[] errors = { };
-    MudTextField<string> pwField1;
-    MudTextField<string> userName;
-    MudTextField<string> email;
-    MudTextField<string> firstName;
-    MudTextField<string> secondName;
-    MudTextField<string> phoneNumber;
+    MudTextField<string> pwField1 = null!;
+    MudTextField<string> userName = null!;
+    MudTextField<string> email = null!;
+    MudTextField<string> firstName = null!;
+    MudTextField<string> secondName = null!;
+    MudTextField<string> phoneNumber = null!;
 
-    string errorMessageforUserName = "";
-    string errorMessageforEmail = "";
+    string errorMessageforUserName = string.Empty;
+    string errorMessageforEmail = string.Empty;
 
-    MudForm form;
+    MudForm form = null!;
 
     private IEnumerable<string> PasswordStrength(string pw)
     {
@@ -80,40 +80,43 @@
     {
         if (form.IsValid) {
             var client = httpClientFactory.CreateClient("localhost");
-                var newUser = new NewUserDto
-                    {
-                        UserName = userName.Value,
-                        Email = email.Value,
-                        FirstName = firstName.Value,
-                        SecondName = secondName.Value,
-                        PhoneNumber = phoneNumber.Value,
-                        Password = pwField1.Value,
-                };
+            var newUser = new NewUserDto
+            {
+                UserName = userName.Value,
+                Email = email.Value,
+                FirstName = firstName.Value,
+                SecondName = secondName.Value,
+                PhoneNumber = phoneNumber.Value,
+                Password = pwField1.Value,
+            };
 
-                using StringContent jsonContent = new(
-                    JsonSerializer.Serialize(newUser),
-                    Encoding.UTF8,
-                    "application/json");
+            using StringContent jsonContent = new(
+                JsonSerializer.Serialize(newUser),
+                Encoding.UTF8,
+                "application/json");
 
             var response = await client.PostAsync(
                         "api/Users/register",
                         jsonContent);
             var h = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
-            if (h.Result == Shared.Enums.LoginRegisterResults.EmailIsExist)
+            if (h == null)
+                return;
+            
+            if (h.Result == LoginRegisterResults.EmailIsExist)
             {
                 errorMessageforEmail = "Email is already exist";
             }
             else
             {
-                errorMessageforEmail = "";
+                errorMessageforEmail = string.Empty;
             }
-            if (h.Result == Shared.Enums.LoginRegisterResults.UserNameIsExist)
+            if (h.Result == LoginRegisterResults.UserNameIsExist)
             {
                 errorMessageforUserName = "User name is already exist";
             }
             else
             {
-                errorMessageforUserName = "";
+                errorMessageforUserName = string.Empty;
             }
         }
 

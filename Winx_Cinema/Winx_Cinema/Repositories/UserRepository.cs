@@ -1,9 +1,7 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.CodeDom.Compiler;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -36,8 +34,6 @@ namespace Winx_Cinema.Repositories
             {
                 return new LoginResponseDto
                 {
-                    user = null,
-                    Token = null,
                     LoginResults = LoginRegisterResults.IncorrectEmail,
                 };
             }
@@ -48,8 +44,6 @@ namespace Winx_Cinema.Repositories
             {
                 return new LoginResponseDto
                 {
-                    user = null,
-                    Token = null,
                     LoginResults = LoginRegisterResults.IncorrectPassword,
                 };
             }
@@ -74,13 +68,12 @@ namespace Winx_Cinema.Repositories
 
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
+                Subject = new ClaimsIdentity(new Claim[]
                 {
 
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512),
-
             };
 
             var token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
@@ -94,7 +87,6 @@ namespace Winx_Cinema.Repositories
 
         public async Task<LoginRegisterResults> CreateUser(NewUserDto model)
         {
-
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user != null)
