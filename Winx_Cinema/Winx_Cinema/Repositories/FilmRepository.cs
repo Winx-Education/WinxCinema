@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Winx_Cinema.Data;
 using Winx_Cinema.Interfaces;
@@ -13,7 +15,79 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Film>> GetAll() => await _context.Films.ToListAsync();
+        public async Task<ICollection<Film>> GetAll(string[] sortBy)
+        {
+            IQueryable<Film> films = _context.Films;
+
+            // Sorting
+            films = Sort(films, sortBy);
+
+            return await films.ToListAsync();
+        }
+
+        private static IQueryable<Film> Sort(IQueryable<Film> films, string[] sortBy)
+        {
+            IOrderedQueryable<Film> sortedFilms = null!;
+
+            bool wasSorted = false;
+            sortBy = sortBy.Distinct().ToArray(); // remove duplicates
+            foreach (var sortField in sortBy)
+            {
+                if (string.IsNullOrWhiteSpace(sortField))
+                    continue;
+
+                string sortCriteria = sortField.Trim();
+
+                // Get sorting order
+                bool ascending = true;
+                if (sortCriteria.StartsWith("-"))
+                {
+                    sortCriteria = sortCriteria.TrimStart('-');
+                    ascending = false;
+                }
+
+                // Get sorting criteria
+                Expression<Func<Film, object>>? sortKey;
+                sortKey = sortCriteria switch
+                {
+                    "rating" => f => f.Rating,
+                    "date" => f => f.ReleaseDate,
+                    _ => null
+                };
+
+                // Ignore not registered criterias
+                if (sortKey == null)
+                    continue;
+
+                // Check if was sorted
+                if (!wasSorted)
+                {
+                    wasSorted = true;
+                    // Apply primary sort
+                    if (ascending)
+                    {
+                        sortedFilms = films.OrderBy(sortKey);
+                        continue;
+                    }
+                    sortedFilms = films.OrderByDescending(sortKey);
+                    continue;
+                }
+
+                // Apply secondary sort
+                if (ascending)
+                {
+                    sortedFilms = sortedFilms.ThenBy(sortKey);
+                    continue;
+                }
+                sortedFilms = sortedFilms.ThenByDescending(sortKey);
+            }
+
+            if (wasSorted)
+            {
+                return sortedFilms;
+            }
+            return films;
+        }
 
         public async Task<Film?> Get(Guid id) => await _context.Films.FirstOrDefaultAsync(f => f.Id == id);
 
