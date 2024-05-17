@@ -64,14 +64,12 @@ namespace Winx_Cinema.Repositories
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var keyStr = _configuration["Jwt:Key"] ?? throw new ConfigurationMissingException();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr));
 
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-
-                }),
+                Subject = new ClaimsIdentity(Array.Empty<Claim>()),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512),
             };
