@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Winx_Cinema.Data;
 using Winx_Cinema.Interfaces;
@@ -15,14 +14,30 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Film>> GetAll(string[] sortBy)
+        public async Task<ICollection<Film>> GetAll(string? search, string[] sortBy)
         {
             IQueryable<Film> films = _context.Films;
+
+            // Sorting
+            films = Search(films, search);
 
             // Sorting
             films = Sort(films, sortBy);
 
             return await films.ToListAsync();
+        }
+
+        private static IQueryable<Film> Search(IQueryable<Film> films, string? search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+                return films;
+
+            search = search.ToLower().Trim();
+
+            // Search for films with similar title, director or cast
+            return films.Where(f => f.Title.ToLower().Contains(search)
+                || f.Director.ToLower().Contains(search)
+                || f.Cast.ToLower().Contains(search));
         }
 
         private static IQueryable<Film> Sort(IQueryable<Film> films, string[] sortBy)
@@ -40,7 +55,7 @@ namespace Winx_Cinema.Repositories
 
                 // Get sorting order
                 bool ascending = true;
-                if (sortCriteria.StartsWith("-"))
+                if (sortCriteria.StartsWith('-'))
                 {
                     sortCriteria = sortCriteria.TrimStart('-');
                     ascending = false;
