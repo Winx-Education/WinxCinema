@@ -1,0 +1,79 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@layout RegisterLoginLayout
+@inject IHttpClientFactory httpClientFactory
+
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+@using System.Text
+@using Winx_Cinema.Shared.Dtos
+<div class="d-flex flex-column align-items-center">
+    <MudPaper Class="pa-4" Style="width: 500px">
+        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+            <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
+                          Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" @ref="email" />
+            <MudText class="text-danger">@errorMessageforEmail</MudText>
+            <MudTextField T="string" Label="Password" @ref="pwField1"
+                          InputType="InputType.Password"
+                          Required="true"
+                          RequiredError="Password is required!" />
+            <MudText class="text-danger">@passwordIsNotCorrect</MudText>
+            <div class="d-flex align-center justify-space-between">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" OnClick="onLogin" Class="ml-auto mt-2">Login</MudButton>
+            </div>
+        </MudForm>
+    </MudPaper>
+</div>
+
+
+@code {
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudTextField<string> email;
+    string errorMessageforEmail = "";
+    string passwordIsNotCorrect = "";
+    MudForm form;
+
+    private async Task onLogin()
+    {
+        if (form.IsValid)
+        {
+            var client = httpClientFactory.CreateClient("localhost");
+            var newUser = new LoginDto
+                {
+                    Password = pwField1.Value,
+                    Email = email.Value,
+                };
+
+            using StringContent jsonContent = new(
+                JsonSerializer.Serialize(newUser),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PostAsync(
+                        "api/Users/login",
+                        jsonContent);
+            var h = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+            Console.WriteLine(h.Token);
+            if (h.LoginResults == Shared.Enums.LoginRegisterResults.IncorrectEmail)
+            {
+                errorMessageforEmail = "Email is incorrect";
+            }
+            else
+            {
+                errorMessageforEmail = "";
+            }
+            if (h.LoginResults == Shared.Enums.LoginRegisterResults.IncorrectPassword)
+            {
+                passwordIsNotCorrect = "Password is not correct";
+            }
+            else
+            {
+                passwordIsNotCorrect = "";
+            }
+        }
+    }
+
+}

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winx_Cinema", "Winx_Cinema\Winx_Cinema.csproj", "{656C4082-A87A-47F4-ADEA-CAE327E772A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winx_Cinema", "Winx_Cinema\Winx_Cinema.csproj", "{656C4082-A87A-47F4-ADEA-CAE327E772A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winx_Cinema.Client", "Winx_Cinema.Client\Winx_Cinema.Client.csproj", "{4246A08E-3C98-4109-AF03-F7FC522690C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winx_Cinema.Client", "Winx_Cinema.Client\Winx_Cinema.Client.csproj", "{4246A08E-3C98-4109-AF03-F7FC522690C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winx_Cinema.Shared", "..\Winx_Cinema.Shared\Winx_Cinema.Shared.csproj", "{74B571C9-E438-4C59-9700-3408263C1C6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winx_Cinema.Shared", "..\Winx_Cinema.Shared\Winx_Cinema.Shared.csproj", "{74B571C9-E438-4C59-9700-3408263C1C6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

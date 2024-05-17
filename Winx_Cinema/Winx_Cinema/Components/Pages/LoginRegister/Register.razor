@@ -1,0 +1,122 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+@layout RegisterLoginLayout
+@inject IHttpClientFactory httpClientFactory
+
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+@using System.Text
+@using Winx_Cinema.Shared.Dtos
+@using Winx_Cinema.Shared.Enums
+<div class="d-flex flex-column align-items-center" >
+    <MudPaper Class="pa-4" Style="width: 500px">
+        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+            <MudTextField T="string" Label="Username" Required="true" RequiredError="User name is required!" @ref="userName"/>
+            <MudText class="text-danger">@errorMessageforUserName</MudText>
+            <MudTextField T="string" Label="First name" Required="true" RequiredError="First name is required!" @ref="firstName"/>
+            <MudTextField T="string" Label="Second name" Required="true" RequiredError="Second name is required!" @ref="secondName"/>
+            <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
+                            Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" @ref="email"/>
+            <MudText class="text-danger">@errorMessageforEmail</MudText>
+            <MudTextField T="string" Label="Phone" Required="true" RequiredError="Phone is required!"
+                            Validation="@(new PhoneAttribute() {ErrorMessage = "The phone number is invalid"})" @ref="phoneNumber"/>
+            <MudTextField T="string" Label="Password" HelperText="Choose a strong password" @ref="pwField1"
+                            InputType="InputType.Password"
+                            Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                            RequiredError="Password is required!" />
+            <MudTextField T="string"
+                            Label="Password" HelperText="Repeat the password" InputType="InputType.Password"
+                            Validation="@(new Func<string, string>(PasswordMatch))" />
+            <div class="d-flex align-center justify-space-between">
+                
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" OnClick="onRegister" Class="ml-auto">Register</MudButton>
+            </div>
+        </MudForm>
+    </MudPaper>
+</div>
+    
+
+@code {
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudTextField<string> userName;
+    MudTextField<string> email;
+    MudTextField<string> firstName;
+    MudTextField<string> secondName;
+    MudTextField<string> phoneNumber;
+
+    string errorMessageforUserName = "";
+    string errorMessageforEmail = "";
+
+    MudForm form;
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "Password is required!";
+            yield break;
+        }
+        if (pw.Length < 8)
+            yield return "Password must be at least of length 8";
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "Password must contain at least one capital letter";
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "Password must contain at least one lowercase letter";
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "Password must contain at least one digit";
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        if (pwField1.Value != arg)
+            return "Passwords don't match";
+        return null;
+    }
+
+    private async Task onRegister()
+    {
+        if (form.IsValid) {
+            var client = httpClientFactory.CreateClient("localhost");
+                var newUser = new NewUserDto
+                    {
+                        UserName = userName.Value,
+                        Email = email.Value,
+                        FirstName = firstName.Value,
+                        SecondName = secondName.Value,
+                        PhoneNumber = phoneNumber.Value,
+                        Password = pwField1.Value,
+                };
+
+                using StringContent jsonContent = new(
+                    JsonSerializer.Serialize(newUser),
+                    Encoding.UTF8,
+                    "application/json");
+
+            var response = await client.PostAsync(
+                        "api/Users/register",
+                        jsonContent);
+            var h = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
+            if (h.Result == Shared.Enums.LoginRegisterResults.EmailIsExist)
+            {
+                errorMessageforEmail = "Email is already exist";
+            }
+            else
+            {
+                errorMessageforEmail = "";
+            }
+            if (h.Result == Shared.Enums.LoginRegisterResults.UserNameIsExist)
+            {
+                errorMessageforUserName = "User name is already exist";
+            }
+            else
+            {
+                errorMessageforUserName = "";
+            }
+        }
+
+    }
+
+}

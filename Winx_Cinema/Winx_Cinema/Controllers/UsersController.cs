@@ -1,8 +1,10 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography.Xml;
 using Winx_Cinema.Interfaces;
 using Winx_Cinema.Shared.Dtos;
 using Winx_Cinema.Shared.Entities;
+using Winx_Cinema.Shared.Enums;
 
 namespace Winx_Cinema.Controllers
 {
@@ -51,21 +53,36 @@ namespace Winx_Cinema.Controllers
 
         [HttpPost]
         [Route("login")]
-
         public async Task<IActionResult> LoginUser(LoginDto model)
         {
             var result = await _repository.Login(model);
 
-            return Ok(result);
+            switch (result.LoginResults)
+            {
+                case LoginRegisterResults.Ok:
+                    return Ok(result);
+                default:
+                    return BadRequest(result);
+            }
         }
         // POST: api/Users
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult<UserDto>> PostUser(NewUserDto dto)
+        public async Task<IActionResult> PostUser(NewUserDto dto)
         {
-            await _repository.CreateUser(dto);
+            var result = await _repository.CreateUser(dto);
 
-            return Ok("Success");
+            switch (result)
+            {
+                case LoginRegisterResults.Ok:
+                    return Ok(new RegisterResponseDto() { Result = LoginRegisterResults.Ok });
+                case LoginRegisterResults.EmailIsExist:
+                    return BadRequest(new RegisterResponseDto() { Result = LoginRegisterResults.EmailIsExist });
+                case LoginRegisterResults.UserNameIsExist:
+                    return BadRequest(new RegisterResponseDto() { Result = LoginRegisterResults.UserNameIsExist});
+                default:
+                    return BadRequest(new RegisterResponseDto(){Result = LoginRegisterResults.SomethingWentWrong});
+            }
         }
 
         // DELETE: api/Users/5
