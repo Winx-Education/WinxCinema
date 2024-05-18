@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Winx_Cinema.Data;
 using Winx_Cinema.Interfaces;
@@ -8,12 +9,27 @@ namespace Winx_Cinema.Repositories
     public class FilmRepository : IFilmRepository
     {
         private readonly AppDbContext _context;
+        private readonly List<string> SearchProps = [nameof(Film.Title), nameof(Film.Director), nameof(Film.Cast)];
+        private readonly Dictionary<string, Expression<Func<Film, object>>> SortExps = new()
+        {
+            {"rating", f => f.Rating},
+            {"date", f => f.ReleaseDate}
+        };
+
         public FilmRepository(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<ICollection<Film>> GetAll() => await _context.Films.ToListAsync();
+        public async Task<ICollection<Film>> GetAll(string? search, string[] sortBy,
+            string? genre, string? rating, string? date) =>
+            await _context.Films
+                .Search(search, SearchProps)
+                .Sort(sortBy, SortExps)
+                .FilterIn(genre, nameof(Film.Genre))
+                .FilterRange<Film, int>(rating, nameof(Film.Rating))
+                .FilterRange<Film, DateTime>(date, nameof(Film.ReleaseDate))
+                .ToListAsync();
 
         public async Task<Film?> Get(Guid id) => await _context.Films.FirstOrDefaultAsync(f => f.Id == id);
 

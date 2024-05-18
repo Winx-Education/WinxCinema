@@ -21,8 +21,10 @@ namespace Winx_Cinema.Controllers
 
         // GET: api/Films
         [HttpGet]
-        public async Task<ActionResult<ICollection<FilmDto>>> GetFilms() =>
-            Ok(_mapper.Map<List<FilmDto>>(await _repository.GetAll()));
+        public async Task<ActionResult<ICollection<FilmDto>>> GetFilms([FromQuery] string? search,
+            [FromQuery] string[] sortBy, [FromQuery] string? genre,
+            [FromQuery] string? rating, [FromQuery] string? date) =>
+            Ok(_mapper.Map<List<FilmDto>>(await _repository.GetAll(search, sortBy, genre, rating, date)));
 
         // GET: api/Films/5
         [HttpGet("{id}")]
