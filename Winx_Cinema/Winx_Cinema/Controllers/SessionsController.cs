@@ -25,8 +25,8 @@ namespace Winx_Cinema.Controllers
 
         // GET: api/Sessions
         [HttpGet]
-        public async Task<ActionResult<ICollection<SessionDto>>> GetSessions() =>
-            Ok(_mapper.Map<List<SessionDto>>(await _sessionRepo.GetAll()));
+        public async Task<ActionResult<ICollection<SessionDto>>> GetSessions([FromQuery] string? time) =>
+            Ok(_mapper.Map<List<SessionDto>>(await _sessionRepo.GetAll(time)));
 
         // GET: api/Sessions/5
         [HttpGet("{id}")]

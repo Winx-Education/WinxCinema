@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Winx_Cinema.Data;
 using Winx_Cinema.Interfaces;
 using Winx_Cinema.Shared.Entities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Winx_Cinema.Repositories
 {
@@ -13,7 +14,7 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Session>> GetAll() => await _context.Sessions.ToListAsync();
+        public async Task<ICollection<Session>> GetAll(string? time) => await _context.Sessions.FilterRange<Session, DateTime>(time, nameof(Session.StartTime)).ToListAsync();
 
         public async Task<Session?> Get(Guid id) => await _context.Sessions.FirstOrDefaultAsync(s => s.Id == id);
 
