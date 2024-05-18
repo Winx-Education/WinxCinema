@@ -195,5 +195,8 @@ namespace Winx_Cinema.Data
             var upperLimit = Expression.LessThanOrEqual(member, constant);
             return Expression.AndAlso(lowerLimit, upperLimit);
         }
+
+        public static IQueryable<T> Paginate<T>(this IQueryable<T> entities, int page, int pageLimit) =>
+            entities.Skip((page - 1) * pageLimit).Take(pageLimit);
     }
 }

@@ -21,15 +21,26 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Film>> GetAll(string? search, string[] sortBy,
-            string? genre, string? rating, string? date) =>
-            await _context.Films
+        public async Task<PagedEntities<Film>> GetAll(string? search, string[] sortBy,
+            string? genre, string? rating, string? date, int page, int pageLimit)
+        {
+            var films = _context.Films
                 .Search(search, SearchProps)
                 .Sort(sortBy, SortExps)
                 .FilterIn(genre, nameof(Film.Genre))
                 .FilterRange<Film, int>(rating, nameof(Film.Rating))
-                .FilterRange<Film, DateTime>(date, nameof(Film.ReleaseDate))
-                .ToListAsync();
+                .FilterRange<Film, DateTime>(date, nameof(Film.ReleaseDate));
+
+            int totalCount = await films.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageLimit);
+
+            films = films.Paginate(page, pageLimit);
+            return new PagedEntities<Film>()
+            {
+                TotalPages = totalPages,
+                Entities = await films.ToListAsync()
+            };
+        }
 
         public async Task<Film?> Get(Guid id) => await _context.Films.FirstOrDefaultAsync(f => f.Id == id);
 
