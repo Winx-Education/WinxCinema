@@ -397,6 +397,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /Winx_Cinema/Winx_Cinema/appsettings.json
-/Winx_Cinema/Winx_Cinema/appsettings.Development.json
-/Winx_Cinema/Winx_Cinema/appsettings-template.json
-/Winx_Cinema/Winx_Cinema/appsettings-template.json
+
