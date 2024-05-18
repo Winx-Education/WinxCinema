@@ -4,7 +4,7 @@ namespace Winx_Cinema.Interfaces
 {
     public interface IFilmRepository
     {
-        Task<ICollection<Film>> GetAll(string? search, string[] sortBy);
+        Task<ICollection<Film>> GetAll(string? search, string[] sortBy, string? genre);
         Task<Film?> Get(Guid id);
         Task Add(Film film);
         Task<bool> Update(Film film);

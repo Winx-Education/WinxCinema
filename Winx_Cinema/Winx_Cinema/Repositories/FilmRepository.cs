@@ -21,8 +21,12 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Film>> GetAll(string? search, string[] sortBy) =>
-            await _context.Films.Search(search, SearchProps).Sort(sortBy, SortExps).ToListAsync();
+        public async Task<ICollection<Film>> GetAll(string? search, string[] sortBy, string? genre) =>
+            await _context.Films
+                .Search(search, SearchProps)
+                .Sort(sortBy, SortExps)
+                .FilterIn(genre, nameof(Film.Genre))
+                .ToListAsync();
 
         public async Task<Film?> Get(Guid id) => await _context.Films.FirstOrDefaultAsync(f => f.Id == id);
 
