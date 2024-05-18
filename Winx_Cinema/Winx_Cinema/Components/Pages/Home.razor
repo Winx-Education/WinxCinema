@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Winx_Cinema.Shared.Dtos
+@using Winx_Cinema.Shared.Entities
 @rendermode InteractiveServer
 @inject IHttpClientFactory httpClientFactory
 <PageTitle>Home</PageTitle>
@@ -74,16 +75,16 @@
 
 
 @code {
-    List<FilmDto> films = new List<FilmDto>();
+    IEnumerable<FilmDto> films = new List<FilmDto>();
 
     protected override async Task OnInitializedAsync()
     {
         var client = httpClientFactory.CreateClient("localhost");
-        var result = await client.GetFromJsonAsync<List<FilmDto>>("api/Films");
+        var result = await client.GetFromJsonAsync<PagedEntities<FilmDto>>("api/Films");
 
         if (result is not null)
         {
-            films = result;
+            films = result.Entities;
         }
         //films = await FilmService.GetFilms(); // Припустимо, що у вас є статичний метод GetFilms у вашому сервісі FilmService, який викликає метод контролера GetFilms
     }
