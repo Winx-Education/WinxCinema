@@ -15,10 +15,12 @@
                 <h1>@film.Title</h1>
                 <h6><b>Film description:</b></h6>
                 <MudText Typo="Typo.body1">@film.Description</MudText>
+                <h6><b>Trailer:</b></h6>
+                <VideoComponent Trailer="film"/>
             </MudItem>
             <MudItem xs="3">
                 <MudStack Spacing="3">
-                    <MudImage Class="mb-4" Src="images/placeholder.png" />
+                    <MudImage Class="mb-4" Src="@film.PicturePath" />
                     <div>
                         <MudText Typo="Typo.subtitle2">Rating</MudText>
                         <MudText>@film.Rating</MudText>
