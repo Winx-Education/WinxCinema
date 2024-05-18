@@ -49,24 +49,35 @@
             <div class="row p-2">
                 <div class="col-12 p-1">
                     <div class="card   flip-card">
+                        <a href="@($"https://localhost:7130/cinema/{film.Id}")">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <img src="@film.PicturePath" class="card-img-top rounded" />
                                 <div class="card-body pb-0">
+                                   
+                                        <img src="@film.PicturePath" class="card-img-top rounded" />
+
+                                    
                                 </div>
                             </div>
                             <div class="flip-card-back">
+                                    
                                 <p class="text-dark opacity-75 text-uppercase text-center">@film.Title</p>
                                 <p class="text-dark text-center">Genre: <span>@film.Genre</span></p>
                                 <p class="text-dark text-center">Director: <span>@film.Director</span></p>
                                 <p class="text-dark text-center">Rating: <span>@film.Rating</span></p>
+                                    
+
+                               
                             </div>
                         </div>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+        
     }
+  
 </div>
 @* <div class="row pb-3">
     @foreach (var film in films)
@@ -124,6 +135,5 @@
         {
             films = result;
         }
-        //films = await FilmService.GetFilms(); // Припустимо, що у вас є статичний метод GetFilms у вашому сервісі FilmService, який викликає метод контролера GetFilms
     }
 }
