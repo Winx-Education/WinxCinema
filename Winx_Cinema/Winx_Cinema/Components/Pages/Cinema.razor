@@ -1,7 +1,7 @@
 @page "/cinema/{Id}"
 @attribute [StreamRendering]
 
-@using Winx_Cinema.Shared.Entities
+@using Winx_Cinema.Shared.Dtos
 @inject IHttpClientFactory httpClientFactory
 
 @switch (dataState)
@@ -16,7 +16,7 @@
                 <h6><b>Film description:</b></h6>
                 <MudText Typo="Typo.body1">@film.Description</MudText>
                 <h6><b>Trailer:</b></h6>
-                <VideoComponent Trailer="film"/>
+                <VideoComponent Trailer="@film.TrailerPath"/>
             </MudItem>
             <MudItem xs="3">
                 <MudStack Spacing="3">
@@ -60,7 +60,7 @@
 @code {
     [Parameter]
     public string? Id { get; set; }
-    private Film film = null!;
+    private FilmDto film = null!;
     private DataState dataState = DataState.Loading;
 
     protected override async Task OnInitializedAsync()
@@ -77,7 +77,7 @@
         switch (response.StatusCode)
         {
             case System.Net.HttpStatusCode.OK:
-                var result = await response.Content.ReadFromJsonAsync<Film>();
+                var result = await response.Content.ReadFromJsonAsync<FilmDto>();
                 if (result == null)
                 {
                     dataState = DataState.Failed;

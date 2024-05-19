@@ -1,14 +1,12 @@
 ﻿<!-- VideoComponent.razor -->
-@using Winx_Cinema.Shared.Entities
 
 <div class="video-container">
     <iframe width="560" height="315"
-            src="@linkTrailer"
+            src="@Trailer"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen>
     </iframe>
-  
 </div>
 
 <style>
@@ -21,24 +19,16 @@
         background: #000;
     }
 
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
 </style>
+
 @code {
     [Parameter]
-    public Film Trailer { get; set; } = null!;
-    private string linkTrailer = "";
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        linkTrailer = Trailer.TrailerPath;
-       
-    }
-    
+    public string Trailer { get; set; } = string.Empty;
 }
