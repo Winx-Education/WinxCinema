@@ -18,12 +18,17 @@ namespace Winx_Cinema.Repositories
 
         public async Task<Session?> Get(Guid id) => await _context.Sessions.FirstOrDefaultAsync(s => s.Id == id);
 
-        public async Task<ICollection<Session>?> GetAllByFilmResolutionId(Guid filmResId)
+        public async Task<ICollection<Session>?> GetAllByFilmResolutionId(Guid filmResId, string? time)
         {
             var filmResolution = await _context.FilmResolutions.Where(fr => fr.Id == filmResId)
                 .Include(fr => fr.Sessions).FirstOrDefaultAsync();
 
-            return filmResolution?.Sessions;
+            if (filmResolution == null)
+                return null;
+
+            return filmResolution.Sessions.AsQueryable()
+                .FilterRange<Session, DateTime>(time, nameof(Session.StartTime))
+                .ToList();
         }
 
         public async Task<bool> Add(Guid filmResId, Guid hallId, Session session)
