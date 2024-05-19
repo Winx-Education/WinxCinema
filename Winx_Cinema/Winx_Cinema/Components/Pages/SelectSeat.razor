@@ -1,0 +1,90 @@
+﻿@page "/select-seat/{Id}"
+@using System.Collections.Generic
+@using Winx_Cinema.Shared.Dtos
+@using Winx_Cinema.Shared.Entities
+@rendermode InteractiveServer
+@inject IHttpClientFactory httpClientFactory
+<h3>Select your seat</h3>
+
+<div class="screen">SCREEN</div>
+
+<table class="theater">
+    @foreach (var rowGroup in Seats.GroupBy(s => s.Row))
+    {
+        <tr>
+            @foreach (var seat in rowGroup)
+            {
+                <td>
+                    <SeatComponent Seat="seat" Id="@Id" />
+                </td>
+            }
+        </tr>
+    }
+</table>
+
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private List<Seat> Seats = new List<Seat>
+    {
+        new Seat { Row = 1, Number = 1,  GenNumber = 1,  IsAvailable = true },
+        new Seat { Row = 1, Number = 2,  GenNumber = 2, IsAvailable = true },
+        new Seat { Row = 1, Number = 3,  GenNumber = 3, IsAvailable = true },
+        new Seat { Row = 1, Number = 4,  GenNumber = 4, IsAvailable = true },
+        new Seat { Row = 1, Number = 5,  GenNumber = 5, IsAvailable = true },
+        new Seat { Row = 1, Number = 6,  GenNumber = 6, IsAvailable = true },
+        new Seat { Row = 1, Number = 7,  GenNumber = 7, IsAvailable = true },
+        new Seat { Row = 1, Number = 8,  GenNumber = 8, IsAvailable = true },
+        new Seat { Row = 2, Number = 1,  GenNumber = 9, IsAvailable = true },
+        new Seat { Row = 2, Number = 2,  GenNumber = 10, IsAvailable = true },
+        new Seat { Row = 2, Number = 3,  GenNumber = 11, IsAvailable = true },
+        new Seat { Row = 2, Number = 4,  GenNumber = 12, IsAvailable = true },
+        new Seat { Row = 2, Number = 5,  GenNumber = 13, IsAvailable = true },
+        new Seat { Row = 2, Number = 6,  GenNumber = 14, IsAvailable = true },
+        new Seat { Row = 2, Number = 7,  GenNumber = 15, IsAvailable = true },
+        new Seat { Row = 2, Number = 8,  GenNumber = 16, IsAvailable = true },
+        new Seat { Row = 3, Number = 1,  GenNumber = 17, IsAvailable = true },
+        new Seat { Row = 3, Number = 2,  GenNumber = 18, IsAvailable = true },
+        new Seat { Row = 3, Number = 3,  GenNumber = 19, IsAvailable = true },
+        new Seat { Row = 3, Number = 4,  GenNumber = 20, IsAvailable = true },
+        new Seat { Row = 3, Number = 5,  GenNumber = 21, IsAvailable = true },
+        new Seat { Row = 3, Number = 6,  GenNumber = 22, IsAvailable = true },
+        new Seat { Row = 3, Number = 7,  GenNumber = 23, IsAvailable = true },
+        new Seat { Row = 3, Number = 8,  GenNumber = 24, IsAvailable = true },
+        // Додайте більше місць за потреби
+    };
+    IEnumerable<TicketDto> tickets = new List<TicketDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id is null)
+        {
+            // Обробка випадку, коли Id не задано
+            Console.Error.WriteLine("Session ID is not provided.");
+            return;
+        }
+
+        var client = httpClientFactory.CreateClient("localhost");
+        var url = $"api/Tickets/Sessions/{Id}";
+        var result = await client.GetFromJsonAsync<List<TicketDto>>(url);
+
+        if (result is not null)
+        {
+            foreach (var ticket in result)
+            {
+                var seat = Seats.FirstOrDefault(s => s.GenNumber == ticket.SitNumber);
+                if (seat != null)
+                {
+                    seat.IsAvailable = false;
+                }
+            }
+        }
+        else
+        {
+            Console.Error.WriteLine("Failed to load tickets.");
+        }
+    }
+
+}
