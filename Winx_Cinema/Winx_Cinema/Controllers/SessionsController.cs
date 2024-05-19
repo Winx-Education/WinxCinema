@@ -42,9 +42,9 @@ namespace Winx_Cinema.Controllers
 
         // GET: api/Sessions/FilmResolutions/5
         [HttpGet("FilmResolutions/{filmResId}")]
-        public async Task<ActionResult<SessionDto>> GetSessionsByFilmResolutionId(Guid filmResId)
+        public async Task<ActionResult<SessionDto>> GetSessionsByFilmResolutionId(Guid filmResId, [FromQuery] string? time)
         {
-            var sessions = await _sessionRepo.GetAllByFilmResolutionId(filmResId);
+            var sessions = await _sessionRepo.GetAllByFilmResolutionId(filmResId, time);
 
             if (sessions == null)
                 return NotFound("FilmResolution wasn't found");
