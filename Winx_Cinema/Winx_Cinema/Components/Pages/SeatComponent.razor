@@ -1,0 +1,133 @@
+﻿@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
+
+
+<style>
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h3 {
+    text-align: center;
+    color: #333;
+}
+
+.screen {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.theater {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.theater table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.theater td {
+    padding: 10px;
+    text-align: center;
+}
+
+.seat {
+    text-align: center;
+}
+
+.seat button {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.seat button:disabled {
+    cursor: not-allowed;
+}
+
+.available button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.available button:hover {
+    transform: scale(1.1);
+}
+
+.unavailable button {
+    background-color: #f44336;
+    color: white;
+}
+
+/* Media Queries for Responsive Design */
+@@media (max-width: 768px) {
+    .theater {
+        padding: 10px;
+    }
+
+    .seat button {
+        width: 40px;
+        height: 40px;
+        font-size: 12px;
+    }
+}
+
+@@media (max-width: 480px) {
+    .theater {
+        padding: 5px;
+    }
+
+    .seat button {
+        width: 30px;
+        height: 30px;
+        font-size: 10px;
+    }
+}
+
+</style>
+<div class="seat @(Seat.IsAvailable ? "available" : "unavailable")">
+    <button @onclick="SelectSeat" disabled="@(Seat.IsAvailable ? false : true)">
+        @(Seat.Row)-@(Seat.Number)
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public Seat Seat { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
+
+    private void SelectSeat()
+    {
+        if (Seat.IsAvailable)
+        {
+            Navigation.NavigateTo($"/purchase/{Id}/{Seat.Row}/{Seat.Number}");
+        }
+    }
+}

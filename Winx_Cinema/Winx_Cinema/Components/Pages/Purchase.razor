@@ -1,0 +1,56 @@
+﻿@page "/purchase/{Id}/{row:int}/{number:int}"
+
+@using Winx_Cinema.Shared.Dtos
+@using Winx_Cinema.Shared.Entities
+
+@rendermode InteractiveServer
+
+@inject NavigationManager Navigation
+@inject IHttpClientFactory HttpClientFactory
+
+<h3>Purchase Ticket</h3>
+
+<p>You have selected seat: Row @Row, Seat @Number</p>
+
+<button @onclick="ProceedToPayment">Proceed to Payment</button>
+
+@code {
+    [Parameter]
+    public int Row { get; set; }
+
+    [Parameter]
+    public int Number { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
+
+    private async Task ProceedToPayment()
+    {
+        var client = HttpClientFactory.CreateClient("localhost");
+        var newTicket = new NewTicketDto
+            {
+                SitNumber = (this.Row - 1) * 8 + this.Number
+                // Додайте інші необхідні поля тут
+            };
+
+        var sessionId = Id;
+        var userId = "1b31f4d9-96c3-4f79-9a2a-554e1b95f278";
+
+        var url = $"api/Tickets?sessionId={sessionId}&userId={userId}";
+        var response = await client.PostAsJsonAsync(url, newTicket);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Обробіть успішну відповідь, можливо перенаправлення користувача
+            var ticket = await response.Content.ReadFromJsonAsync<TicketDto>();
+            // Наприклад, перенаправлення на сторінку з підтвердженням
+            Navigation.NavigateTo($"/select-seat/{sessionId}");
+        }
+        else
+        {
+            // Обробіть помилку
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            // Показати повідомлення про помилку користувачу
+            Console.Error.WriteLine($"Error: {errorMessage}");
+        }
+    }
+}

@@ -3,7 +3,7 @@
 
 @using Winx_Cinema.Shared.Dtos
 @inject IHttpClientFactory httpClientFactory
-
+@inject NavigationManager Navigation
 @switch (filmDataState)
 {
     case DataState.Loading:
@@ -35,7 +35,7 @@
                                                 <MudText>@filmResSessionPair.Key.Resolution</MudText>
                                                 @foreach (var session in filmResSessionPair.Value)
                                                 {
-                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary">@session.StartTime.ToString("H:mm")</MudButton>
+                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SelectSeat(session.Id.ToString())">@session.StartTime.ToString("H:mm")</MudButton>
                                                 }
                                             </MudStack>
                                         }
@@ -257,7 +257,14 @@
         var client = httpClientFactory.CreateClient("localhost");
         return await client.GetAsync($"api/sessions/filmResolutions/{filmResId}?{query}");
     }
-
+    private void SelectSeat(string sessionId)
+    {
+        // Додайте код, який ви хочете виконати при натисканні на кнопку
+        if (sessionId!=null)
+        {
+            Navigation.NavigateTo($"/select-seat/{sessionId}");
+        }
+    }
     private enum DataState
     {
         Loading,
