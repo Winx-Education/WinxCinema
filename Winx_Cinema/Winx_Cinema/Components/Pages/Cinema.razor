@@ -1,10 +1,10 @@
 @page "/cinema/{Id}"
-@attribute [StreamRendering]
+@rendermode InteractiveServer
 
 @using Winx_Cinema.Shared.Dtos
 @inject IHttpClientFactory httpClientFactory
 
-@switch (dataState)
+@switch (filmDataState)
 {
     case DataState.Loading:
         <MudText><em>Loading...</em></MudText>
@@ -12,11 +12,50 @@
     case DataState.Success:
         <MudGrid>
             <MudItem xs="9">
-                <h1>@film.Title</h1>
-                <h6><b>Film description:</b></h6>
-                <MudText Typo="Typo.body1">@film.Description</MudText>
-                <h6><b>Trailer:</b></h6>
-                <VideoComponent Trailer="@film.TrailerPath"/>
+                <MudStack Spacing="2">
+                    <VideoComponent Trailer="@film.TrailerPath" />
+
+                    <h1 class="mb-0">@film.Title</h1>
+
+                    @switch (sessionsDataState)
+                    {
+                        case DataState.Loading:
+                            <MudText><em>Loading sessions...</em></MudText>
+                            break;
+                        case DataState.Success:
+                            <MudStack Spacing="3">
+                                @foreach (var dateSessionPair in sessions)
+                                {
+                                    <MudStack Spacing="1">
+                                        <MudText class="mb-1">@ToStringDate(dateSessionPair.Key)</MudText>
+
+                                        @foreach (var filmResSessionPair in dateSessionPair.Value)
+                                        {
+                                            <MudStack Spacing="3" Row="true" Wrap="Wrap.Wrap" AlignItems="AlignItems.Center">
+                                                <MudText>@filmResSessionPair.Key.Resolution</MudText>
+                                                @foreach (var session in filmResSessionPair.Value)
+                                                {
+                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary">@session.StartTime.ToString("H:mm")</MudButton>
+                                                }
+                                            </MudStack>
+                                        }
+                                    </MudStack>
+                                }
+                            </MudStack>
+                            break;
+                        case DataState.Missing:
+                            <MudText><em>Session were not found...</em></MudText>
+                            break;
+                        case DataState.Failed:
+                            <MudText><em>Failed to load sessions</em></MudText>
+                            break;
+                    }
+
+                    <div class="mt-3">
+                        <h6><b>Film description:</b></h6>
+                        <MudText Typo="Typo.body1">@film.Description</MudText>
+                    </div>
+                </MudStack>
             </MudItem>
             <MudItem xs="3">
                 <MudStack Spacing="3">
@@ -61,13 +100,21 @@
     [Parameter]
     public string? Id { get; set; }
     private FilmDto film = null!;
-    private DataState dataState = DataState.Loading;
+    private DataState filmDataState = DataState.Loading;
+    private SortedDictionary<DateTime, Dictionary<FilmResolutionDto, IEnumerable<SessionDto>>> sessions = new();
+    private DataState sessionsDataState = DataState.Loading;
+
+    private string ToStringDate(DateTime dateTime)
+    {
+        string year = dateTime.Year != DateTime.UtcNow.Year ? dateTime.Year.ToString() + ' ' : string.Empty;
+        return $"{year}{dateTime.Day} {dateTime.ToString("MMMM")} {dateTime.ToString("dddd")}";
+    }
 
     protected override async Task OnInitializedAsync()
     {
         if (Id == null)
         {
-            dataState = DataState.Failed;
+            filmDataState = DataState.Failed;
             return;
         }
 
@@ -80,19 +127,135 @@
                 var result = await response.Content.ReadFromJsonAsync<FilmDto>();
                 if (result == null)
                 {
-                    dataState = DataState.Failed;
+                    filmDataState = DataState.Failed;
                     break;
                 }
                 film = result;
-                dataState = DataState.Success;
+                filmDataState = DataState.Success;
                 break;
             case System.Net.HttpStatusCode.NotFound:
-                dataState = DataState.Missing;
+                filmDataState = DataState.Missing;
                 break;
             default:
-                dataState = DataState.Failed;
+                filmDataState = DataState.Failed;
                 break;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (sessionsDataState == DataState.Loading && filmDataState == DataState.Success)
+        {
+            await UpdateSessions();
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateSessions()
+    {
+        var filmResResponse = await FetchFilmResolutions();
+
+        // Fetch FilmResolutions
+        IEnumerable<FilmResolutionDto> filmResolutions;
+        switch (filmResResponse.StatusCode)
+        {
+            case System.Net.HttpStatusCode.OK:
+                var result = await filmResResponse.Content.ReadFromJsonAsync<IEnumerable<FilmResolutionDto>>();
+                if (result == null)
+                {
+                    sessionsDataState = DataState.Failed;
+                    return;
+                }
+                // Check if any FilmResolution were returned
+                if (!result.Any())
+                {
+                    sessionsDataState = DataState.Missing;
+                    return;
+                }
+                filmResolutions = result;
+                break;
+            case System.Net.HttpStatusCode.NotFound:
+                sessionsDataState = DataState.Missing;
+                return;
+            default:
+                sessionsDataState = DataState.Failed;
+                return;
+        }
+
+        // Fetch relevant Sessions
+        List<DateTime> dateTimes = new();
+        Dictionary<FilmResolutionDto, IEnumerable<SessionDto>> filmSessions = new();
+        foreach (var filmRes in filmResolutions)
+        {
+            var sessionsResponse = await FetchRelevantSessions(filmRes.Id.ToString());
+
+            switch (sessionsResponse.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    var result = await sessionsResponse.Content.ReadFromJsonAsync<IEnumerable<SessionDto>>();
+                    if (result == null)
+                    {
+                        sessionsDataState = DataState.Failed;
+                        return;
+                    }
+                    // Check if any sessions were returned
+                    if (!result.Any())
+                        break;
+
+                    filmSessions.Add(filmRes, result);
+                    foreach (var session in result)
+                        dateTimes.Add(session.StartTime.Date);
+                    break;
+                case System.Net.HttpStatusCode.NotFound:
+                    break;
+                default:
+                    sessionsDataState = DataState.Failed;
+                    return;
+            }
+        }
+
+        // Check if any Sessions exist
+        if (!filmSessions.Any())
+        {
+            sessionsDataState = DataState.Missing;
+            return;
+        }
+
+        // Write results in sorted data structure
+        var distDateTimes = dateTimes.Distinct();
+
+        foreach (var dateTime in distDateTimes)
+        {
+            sessions.Add(dateTime, new Dictionary<FilmResolutionDto, IEnumerable<SessionDto>>());
+            foreach (var filmRes in filmSessions.Keys)
+            {
+                var filteredSessions = filmSessions[filmRes]
+                    .Where(s => s.StartTime.Date == dateTime)
+                    .OrderBy(s => s.StartTime)
+                    .ToList();
+                if (filteredSessions.Any())
+                    sessions[dateTime].Add(filmRes, filteredSessions);
+            }
+        }
+
+        // Show sessions
+        sessionsDataState = DataState.Success;
+    }
+
+    private async Task<HttpResponseMessage> FetchFilmResolutions()
+    {
+        var client = httpClientFactory.CreateClient("localhost");
+        return await client.GetAsync($"api/filmResolutions/films/{Id}");
+    }
+
+    private async Task<HttpResponseMessage> FetchRelevantSessions(string filmResId)
+    {
+        var dateTime = DateTime.UtcNow;
+        var date = dateTime.ToString("yyyy.MM.dd");
+        var time = dateTime.ToString("HH:mm:ss");
+        string query = $"time=>{date}T{time}";
+        var client = httpClientFactory.CreateClient("localhost");
+        return await client.GetAsync($"api/sessions/filmResolutions/{filmResId}?{query}");
     }
 
     private enum DataState
