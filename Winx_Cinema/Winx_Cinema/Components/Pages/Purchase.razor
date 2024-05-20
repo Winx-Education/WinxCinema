@@ -8,11 +8,60 @@
 @inject NavigationManager Navigation
 @inject IHttpClientFactory HttpClientFactory
 
-<h3>Purchase Ticket</h3>
+<style>
+    .purchase-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #f7f7f7;
+        padding: 2rem;
+    }
 
-<p>You have selected seat: Row @Row, Seat @Number</p>
+    .purchase-card {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+    }
 
-<button @onclick="ProceedToPayment">Proceed to Payment</button>
+        .purchase-card h3 {
+            color: #00796b;
+            margin-bottom: 1rem;
+        }
+
+        .purchase-card p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+    .purchase-button {
+        background-color: #00796b;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .purchase-button:hover {
+            background-color: #004d40;
+        }
+</style>
+
+<div class="purchase-container">
+    <div class="purchase-card">
+        <h3>Purchase Ticket</h3>
+        <p>You have selected seat: Row @Row, Seat @Number</p>
+        <button class="purchase-button" @onclick="ProceedToPayment">Proceed to Payment</button>
+    </div>
+</div>
 
 @code {
     [Parameter]
@@ -20,6 +69,7 @@
 
     [Parameter]
     public int Number { get; set; }
+
     [Parameter]
     public string? Id { get; set; }
 
@@ -29,7 +79,6 @@
         var newTicket = new NewTicketDto
             {
                 SitNumber = (this.Row - 1) * 8 + this.Number
-                // Додайте інші необхідні поля тут
             };
 
         var sessionId = Id;
@@ -40,16 +89,13 @@
 
         if (response.IsSuccessStatusCode)
         {
-            // Обробіть успішну відповідь, можливо перенаправлення користувача
+            
             var ticket = await response.Content.ReadFromJsonAsync<TicketDto>();
-            // Наприклад, перенаправлення на сторінку з підтвердженням
             Navigation.NavigateTo($"/select-seat/{sessionId}");
         }
         else
         {
-            // Обробіть помилку
             var errorMessage = await response.Content.ReadAsStringAsync();
-            // Показати повідомлення про помилку користувачу
             Console.Error.WriteLine($"Error: {errorMessage}");
         }
     }
