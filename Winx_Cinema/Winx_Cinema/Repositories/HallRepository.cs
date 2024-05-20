@@ -13,7 +13,21 @@ namespace Winx_Cinema.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Hall>> GetAll() => await _context.Halls.ToListAsync();
+        public async Task<PagedEntities<Hall>> GetAll(int page, int pageLimit)
+        {
+            var halls = _context.Halls.AsQueryable();
+
+            int totalCount = await halls.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageLimit);
+
+            halls = halls.Paginate(page, pageLimit);
+
+            return new PagedEntities<Hall>()
+            {
+                TotalPages = totalPages,
+                Entities = await halls.ToListAsync(),
+            };
+        } 
 
         public async Task<Hall?> Get(Guid id) => await _context.Halls.FirstOrDefaultAsync(h => h.Id == id);
 

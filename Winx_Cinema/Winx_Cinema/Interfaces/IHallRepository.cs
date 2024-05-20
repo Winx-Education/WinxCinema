@@ -4,7 +4,7 @@ namespace Winx_Cinema.Interfaces
 {
     public interface IHallRepository
     {
-        Task<ICollection<Hall>> GetAll();
+        Task<PagedEntities<Hall>> GetAll(int page, int pageLimit);
         Task<Hall?> Get(Guid id);
         Task Add(Hall hall);
         Task<bool> Update(Hall hall);

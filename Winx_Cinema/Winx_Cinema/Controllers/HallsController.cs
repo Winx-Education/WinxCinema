@@ -21,8 +21,19 @@ namespace Winx_Cinema.Controllers
 
         // GET: api/Halls
         [HttpGet]
-        public async Task<ActionResult<ICollection<HallDto>>> GetHalls() =>
-            Ok(_mapper.Map<List<HallDto>>(await _repository.GetAll()));
+        public async Task<ActionResult<PagedEntities<HallDto>>> GetHalls(
+            [FromQuery] int page = 1, [FromQuery] int pageLimit = 10)
+        {
+            var result = await _repository.GetAll(page, pageLimit);
+            var dtos = _mapper.Map<List<HallDto>>(result.Entities);
+
+            return Ok(new PagedEntities<HallDto>
+            {
+                TotalPages = result.TotalPages,
+                Entities = dtos
+            });
+        }
+          
 
         // GET: api/Halls/5
         [HttpGet("{id}")]

@@ -1,0 +1,192 @@
+﻿@using System.Text.Json
+@using System.Text
+@using Winx_Cinema.Shared.Dtos
+@inject IHttpClientFactory httpClientFactory;
+
+<style>
+    .main-card {
+        width: 700px;
+        padding: 20px;
+    }
+    /* Стилі для кастомізації InputFile */
+    .custom-input-file {
+        /* Ваші стилі тут */
+        /* Наприклад */
+        margin-left: auto;
+        margin-right: auto;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        color: #333;
+        cursor: pointer;
+        display: inline-block;
+    }
+</style>
+
+<MudCard Class="main-card">
+    <MudTextField Value="title" @ref="Title" T="string" Label="Title"/>
+    <MudTextField Value="description" T="string" @ref="Description" Label="Description" Lines="5"/>
+    <MudTextField Value="genre" T="string" @ref="Genre" Label="Ganre"/>
+    <MudTextField Value="director" T="string" @ref="Director" Label="Director"/>
+    <MudTextField Value="cast" T="string" @ref="Cast" Label="Cast" Lines="5"/>
+    <MudTextField Value="rating" T="int" @ref="Rating" Label="Rating"/>
+    <MudTextField Value="trailerPath" T="string" @ref="TrailerPath" Label="Trailer path"/>
+    <MudDatePicker Label="Release date" Editable="true" @bind-Date="ReleaseDate" Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="de-AT Date" />
+    <MudTimePicker PickerVariant="PickerVariant.Dialog" Label="Duration" @bind-Time="Duration" />
+    <InputFile  OnChange="HandleSelected" class="custom-input-file">
+    </InputFile>
+    <MudCardContent>
+        @if (!isOnCreate)
+        {
+            <MudButton OnClick
+            ="addNewFilm" Variant
+            ="Variant.Filled" Color
+            ="Color.Primary" Class
+            ="w-100 ">Add New Film</MudButton>
+        }
+        else
+        {
+            <MudButton OnClick="onUpdateFilm" Variant="Variant.Filled" Color="Color.Primary" Class="w-100 ">Update Film</MudButton>
+        }
+        <MudButton OnClick="onCencelForm" Variant="Variant.Filled" Color="Color.Error" Class="w-100 mt-4">Cencel</MudButton>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public bool isOnCreate { get; set; } = true;
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    [Parameter]
+    public string title { get; set; } = "";
+    private MudTextField<string> Title;
+
+    [Parameter]
+    public string picturePath { get; set; } = "";
+
+    [Parameter]
+    public string description { get; set; } = "";
+    private MudTextField<string> Description;
+
+    [Parameter]
+    public string genre { get; set; } = "";
+    private MudTextField<string> Genre;
+
+    [Parameter]
+    public string director { get; set; } = "";
+    private MudTextField<string> Director;
+
+    [Parameter]
+    public string cast { get; set; } = "";
+    private MudTextField<string> Cast;
+
+    [Parameter]
+    public string trailerPath { get; set; } = "";
+    private MudTextField<string> TrailerPath;
+
+    [Parameter]
+    public TimeSpan? Duration { get; set; } = new TimeSpan(0, 0, 0);
+
+    [Parameter]
+    public int rating { get; set; } = 0;
+    private MudTextField<int> Rating;
+
+    [Parameter]
+    public DateTime? ReleaseDate { get; set; } = new DateTime();
+
+    [Parameter]
+    public Action OnCencelForm { get; set; }
+
+    private IBrowserFile selectedFile;
+    private bool isFileSelected = false;
+
+    private void onCencelForm()
+    {
+        OnCencelForm?.Invoke();
+    }
+
+    private void HandleSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        isFileSelected = selectedFile != null;
+    }
+
+    private async Task addNewFilm()
+    {
+        var newFilm = new NewFilmDto()
+        {
+            Title = Title.Value,
+            Description = Description.Value,
+            Genre = Genre.Value,
+            Director = Director.Value,
+            Cast = Cast.Value,
+            TrailerPath = TrailerPath.Value,
+            Duration = Duration.Value,
+            Rating = Rating.Value,
+            ReleaseDate = ReleaseDate.Value,
+            PicturePath = $"images/{selectedFile.Name}"
+        };
+
+        await UploadFile();
+
+        var client = httpClientFactory.CreateClient("localhost");
+
+        using StringContent jsonContent = new(
+                JsonSerializer.Serialize(newFilm),
+                Encoding.UTF8,
+                "application/json");
+
+        var response = await client.PostAsync(
+                    "api/Films",
+                    jsonContent);
+    }
+
+    private async Task UploadFile()
+    {
+        if (selectedFile != null)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await selectedFile.OpenReadStream().CopyToAsync(memoryStream);
+                var content = new MultipartFormDataContent();
+                var fileContent = new ByteArrayContent(memoryStream.ToArray());
+                fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(selectedFile.ContentType);
+                content.Add(fileContent, "file", selectedFile.Name);
+
+                var client = httpClientFactory.CreateClient("localhost");
+
+                var response = await client.PostAsync("api/Films/upload", content);
+
+            }
+        }
+    }
+
+    private async Task onUpdateFilm()
+    {
+        var newFilm = new NewFilmDto()
+        {
+            Title = Title.Value,
+            Cast = Cast.Value,
+            Description = Description.Value,
+            Director = Director.Value,
+            Duration = (TimeSpan)Duration,
+            Genre = Genre.Value,
+            PicturePath = picturePath,
+            Rating = Rating.Value,
+            ReleaseDate = (DateTime)ReleaseDate,
+            TrailerPath = TrailerPath.Value
+        };
+
+        var client = httpClientFactory.CreateClient("localhost");
+
+        using StringContent jsonContent = new(
+        JsonSerializer.Serialize(newFilm),
+        Encoding.UTF8,
+        "application/json");
+
+        var response = await client.PutAsync($"api/Films/{Id}", jsonContent);
+    }
+}

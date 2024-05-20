@@ -1,0 +1,90 @@
+﻿@using Winx_Cinema.Shared.Dtos
+@inject IHttpClientFactory httpClientFactory;
+
+<style>
+    .add-button{
+        width: 400px;
+    }
+</style>
+
+@if (displayAddForm && !displayUpdateForm)
+{
+    <AddHallForm isOnCreate="displayUpdateForm" halls="halls" cencelForm="onCencelForm" />
+}
+else
+{
+    <MudButton OnClick="showAddHallForm" Variant="Variant.Outlined" Class="add-button d-block mb-4">Add New Hall</MudButton>
+
+    <div class="row">
+        @foreach (var item in halls)
+        {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2" style="flex: 0 0 calc(20% - 10px); max-width: calc(20% - 10px);">
+                <MudCard Class="main-card-hall mb-4">
+                    <img src="images/hall-icon.png" />
+                    <MudCardContent>
+                        <MudCardContent Class="d-flex justify-content-between">
+                            <MudText>№ @item.Number</MudText>
+                            <MudText>@item.Resolution</MudText>
+                        </MudCardContent>
+                        <MudCardContent Class="d-flex justify-content-between">
+                            <MudText>Capacity:</MudText>
+                            <MudText>@item.Capacity</MudText>
+                        </MudCardContent>
+                        <MudCardActions Class="d-flex justify-content-between">
+                            <MudButton OnClick="() => deleteHall(item.Id)" Variant="Variant.Text" Color="Color.Error">Delete</MudButton>
+                            <MudButton OnClick="() => updateHall(item.Capacity, item.Number, item.Id)" Variant="Variant.Text" Color="Color.Primary">Update</MudButton>
+                        </MudCardActions>
+                    </MudCardContent>
+                </MudCard>
+            </div>
+        }
+    </div>
+}
+
+@if (displayUpdateForm && !displayAddForm)
+{
+    <AddHallForm isOnCreate="displayUpdateForm" capacity="capacity" number="number" Id="Id"/>
+}
+
+@code {
+
+
+    [Parameter]
+    public List<HallDto> halls { get; set; } = new List<HallDto>();
+    public bool displayAddForm { get; set; } = true;
+    public bool displayUpdateForm { get; set; } = false;
+    public int capacity;
+    public int number;
+    public Guid Id;
+
+    public void onCencelForm()
+    {
+        displayAddForm = false;
+        StateHasChanged();
+    }
+
+    public void showAddHallForm()
+    {
+        displayAddForm = true;
+        StateHasChanged();
+    }
+
+    public void deleteHall(Guid Id)
+    {
+        var client = httpClientFactory.CreateClient("localhost");
+        client.DeleteAsync($"api/Halls/{Id}");
+
+        halls = halls.Where(x => x.Id != Id).ToList();
+        StateHasChanged();
+    }
+
+    public void updateHall(int capacity, int number, Guid Id)
+    {
+        displayUpdateForm = true;
+        this.Id = Id;
+        this.capacity = capacity;
+        this.number = number;
+        StateHasChanged();
+    }
+
+}

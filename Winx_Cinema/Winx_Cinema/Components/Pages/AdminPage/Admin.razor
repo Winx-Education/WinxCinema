@@ -1,0 +1,105 @@
+﻿@page "/admin"
+@using Winx_Cinema.Shared.Dtos
+@using Winx_Cinema.Shared.Entities
+@rendermode InteractiveServer
+@inject IHttpClientFactory httpClientFactory
+
+<style>
+    .main-card-film {
+        width: 600px;
+    }
+
+    .main-card-hall {
+        width: 200px;
+    }
+</style>
+
+
+<h3>Admin</h3>
+
+<MudButton OnClick="onSelectFilms" Variant="Variant.Text">Films</MudButton>
+<MudButton OnClick="onSelectHalls" Variant="Variant.Text">Halls</MudButton>
+
+@if (filmsSelected)
+{
+    <FilmList films="films"/>
+}
+
+@if (!filmsSelected)
+{
+    <div class="row">
+      <HallsList halls="halls"/>
+    </div>
+}
+
+@code {
+    bool filmsSelected = true;
+    bool filmRequestWas = false;
+    bool hallRequestWas = false;
+
+    IEnumerable<FilmDto> films = new List<FilmDto>();
+    List<HallDto> halls = new List<HallDto>();
+
+    private async Task onSelectFilms()
+    {
+        if (!filmsSelected)
+        {
+            filmsSelected = true;
+
+            if (filmRequestWas)
+            {
+                return;
+            }
+            var client = httpClientFactory.CreateClient("localhost");
+            var result = await client.GetFromJsonAsync<PagedEntities<FilmDto>>("api/Films");
+            if (result is not null)
+            {
+                films = result.Entities;
+            }
+            filmRequestWas = true;
+        }
+    }
+
+    private async Task onSelectHalls()
+    {
+        if (filmsSelected)
+        {
+            filmsSelected = false;
+
+            if (hallRequestWas)
+            {
+                return;
+            }
+
+            var client = httpClientFactory.CreateClient("localhost");
+            var result = await client.GetFromJsonAsync<PagedEntities<HallDto>>("api/Halls");
+            if (result is not null)
+            {
+                halls = result.Entities.ToList();
+            }
+            hallRequestWas = true;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = httpClientFactory.CreateClient("localhost");
+        if (filmsSelected)
+        {
+            var result = await client.GetFromJsonAsync<PagedEntities<FilmDto>>("api/Films");
+            if (result is not null)
+            {
+                films = result.Entities;
+            }
+        }
+        else
+        {
+            var result = await client.GetFromJsonAsync<PagedEntities<HallDto>>("api/Films");
+            if (result is not null)
+            {
+                halls = result.Entities.ToList();
+            }
+        }
+    }
+
+}

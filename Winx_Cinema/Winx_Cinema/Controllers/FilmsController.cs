@@ -12,11 +12,13 @@ namespace Winx_Cinema.Controllers
     {
         private readonly IFilmRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public FilmsController(IFilmRepository repository, IMapper mapper)
+        public FilmsController(IFilmRepository repository, IMapper mapper, IWebHostEnvironment hostingEnvironment)
         {
             _repository = repository;
             _mapper = mapper;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         // GET: api/Films
@@ -69,6 +71,26 @@ namespace Winx_Cinema.Controllers
             await _repository.Add(film);
 
             return CreatedAtAction(nameof(GetFilm), new { film?.Id }, _mapper.Map<FilmDto>(film));
+        }
+
+        [HttpPost]
+        [Route("upload")]
+        public async Task<IActionResult> uploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File not selected");
+
+            var uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "images");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var filePath = Path.Combine(uploadsFolder, file.FileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return Ok("File uploaded successfully");
         }
 
         // DELETE: api/Films/5

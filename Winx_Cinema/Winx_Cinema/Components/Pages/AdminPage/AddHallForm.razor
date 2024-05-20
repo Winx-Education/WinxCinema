@@ -1,0 +1,110 @@
+﻿@using System.Text.Json
+@using System.Text
+@using Winx_Cinema.Shared.Dtos
+@using Winx_Cinema.Shared.Entities
+@inject IHttpClientFactory httpClientFactory;
+
+<style>
+    .main-card{
+        width: 400px;
+        padding: 20px;
+    }
+</style>
+
+<MudCard Class="main-card" >
+    <MudTextField Value="number" @ref="Number" T="int" Label="Number"/>
+    <MudTextField Value="capacity" @ref="Capacity" T="int" Label="Capacity"/>
+    <MudSelect T="string" Label="Resolution" AnchorOrigin="Origin.BottomCenter">
+        <MudSelectItem T="string" Value=@("2D/3D")>2D/3D</MudSelectItem>
+        <MudSelectItem T="string" Value=@("4D/4DX")>4D/4DX</MudSelectItem>
+    </MudSelect>
+    @if (!isOnCreate)
+    {
+        <MudButton OnClick="onAddNewHall" Variant="Variant.Filled" Color="Color.Primary" Class="w-100 mt-4">Add</MudButton>
+    }
+    else
+    {
+        <MudButton OnClick="noUpdateHall" Variant="Variant.Filled" Color="Color.Primary" Class="w-100 mt-4" >Update</MudButton>
+    }
+    <MudButton OnClick="onCencelForm" Variant="Variant.Filled" Color="Color.Error" Class="w-100 mt-4">Cencel</MudButton>
+</MudCard>
+
+
+@code {
+    [Parameter]
+    public Action cencelForm { get; set; }
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    [Parameter]
+    public bool isOnCreate { get; set; } = true;
+
+    [Parameter]
+    public List<HallDto> halls { get; set; } = new List<HallDto>();
+
+    [Parameter]
+    public int number { get; set; } = 0;
+
+    public MudTextField<int> Number { get; set; } = new MudTextField<int>();
+    [Parameter]
+    public int capacity { get; set; } = 0;
+    public MudTextField<int> Capacity { get; set; } = new MudTextField<int>();
+
+    private void onCencelForm()
+    {
+        cencelForm?.Invoke();
+    }
+
+    private async Task onAddNewHall()
+    {
+        var newHall = new NewHallDto()
+        {
+            Capacity = Capacity.Value,
+            Number = Number.Value,
+            Resolution = "4D"
+        };
+
+        var client = httpClientFactory.CreateClient("localhost");
+
+        using StringContent jsonContent = new(
+                JsonSerializer.Serialize(newHall),
+                Encoding.UTF8,
+                "application/json");
+
+        var response = await client.PostAsync(
+                    "api/Halls",
+                    jsonContent);
+        var hall = await response.Content.ReadFromJsonAsync<HallDto>();
+        halls.Add(hall);
+    }
+
+    private async Task noUpdateHall()
+    {
+        var newHall = new NewHallDto()
+            {
+                Capacity = Capacity.Value,
+                Number = Number.Value,
+                Resolution = "4D"
+            };
+
+        var client = httpClientFactory.CreateClient("localhost");
+
+        using StringContent jsonContent = new(
+        JsonSerializer.Serialize(newHall),
+        Encoding.UTF8,
+        "application/json");
+
+        var response = await client.PutAsync($"api/Halls/{Id}", jsonContent);
+
+        var UpdateHall = halls.ToList().FirstOrDefault(x => x.Id == Id);
+
+        if (UpdateHall != null)
+        {
+            UpdateHall.Number = Number.Value;
+            UpdateHall.Capacity = Capacity.Value;
+        }
+
+        Console.WriteLine(response.StatusCode);
+    }
+}

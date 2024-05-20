@@ -1,0 +1,106 @@
+﻿@using Winx_Cinema.Shared.Dtos
+@inject IHttpClientFactory httpClientFactory;
+
+@if (displayAddForm && !displayUpdateForm)
+{
+    <AddFilmForm OnCencelForm="cencelForm"/>
+}
+else
+{
+    <MudButton OnClick="showAddFilmForm" Variant="Variant.Outlined" Class="add-button d-block mb-4">Add New Hall</MudButton>
+
+    @foreach (var item in films)
+    {
+        <MudCard Class="d-flex main-card-film mb-4">
+            <img height="400px" src="@item.PicturePath" class=" rounded" />
+            <MudCardContent Class="w-100 d-flex flex-column justify-content-between">
+                <MudCardContent>
+                    <MudText Typo="Typo.h4">@item.Title</MudText>
+                    <MudText Typo="Typo.h6">@item.Genre</MudText>
+                    <MudText Typo="Typo.body2">Director: @item.Director</MudText>
+                </MudCardContent>
+                <MudCardActions Class="d-flex gap-2 justify-content-end">
+                    <MudButton OnClick="() => deleteFilm(item.Id)" Variant="Variant.Text" Color="Color.Error">Delete</MudButton>
+                    <MudButton OnClick="() => updateFilm(item.Id, item.Title, item.Description, item.Genre, item.Director, item.Cast, item.TrailerPath, item.Duration, item.Rating, item.ReleaseDate, item.PicturePath)" Variant="Variant.Text" Color="Color.Primary">Update</MudButton>
+                </MudCardActions>
+            </MudCardContent>
+        </MudCard>
+    }
+}
+
+@if (displayUpdateForm)
+{
+    <AddFilmForm 
+        isOnCreate="@displayUpdateForm"
+        title="@title" 
+        description="@description" 
+        genre="@genre" 
+        director="@director"
+        Id="@Id"
+        cast="@cast"
+        trailerPath="@trailerPath"
+        picturePath="@picturePath"
+        Duration="@Duration"
+        rating="@rating"
+        ReleaseDate="@ReleaseDate"
+        OnCencelForm="cencelForm" />
+}
+
+
+@code {
+    [Parameter]
+    public IEnumerable<FilmDto> films { get; set; } = new List<FilmDto>();
+    public bool displayAddForm { get; set; } = false;
+    public bool displayUpdateForm { get; set; } = false;
+
+    public Guid Id { get; set; }
+    public string title { get; set; } = "";
+    public string description { get; set; } = "";
+    public string genre { get; set; } = "";
+    public string director { get; set; } = "";
+    public string cast { get; set; } = "";
+    public string trailerPath { get; set; } = "";
+    public string picturePath { get; set; } = "";
+    public TimeSpan? Duration { get; set; } = new TimeSpan(0, 0, 0);
+    public int rating { get; set; } = 0;
+    public DateTime? ReleaseDate { get; set; } = new DateTime();
+
+    private void showAddFilmForm()
+    {
+        displayAddForm = true;
+        StateHasChanged();
+    }
+
+    private void cencelForm()
+    {
+        displayAddForm = false;
+        StateHasChanged();
+    }
+
+    private async Task deleteFilm(Guid Id)
+    {
+        var client = httpClientFactory.CreateClient("localhost");
+
+        var response = await client.DeleteAsync($"api/Films/{Id}");
+
+        films = films.Where(x => x.Id != Id);
+        StateHasChanged();
+    }
+
+    private void updateFilm(Guid Id, string title, string description, string genre, string director, string cast, string trailerPath, TimeSpan? Duration, int rating, DateTime? ReleaseDate, string picturePath)
+    {
+        displayUpdateForm = true;
+        this.Id = Id;
+        this.title = title;
+        this.description = description;
+        this.genre = genre;
+        this.director = director;
+        this.cast = cast;
+        this.trailerPath = trailerPath;
+        this.Duration = Duration;
+        this.rating = rating;
+        this.ReleaseDate = ReleaseDate;
+        this.picturePath = picturePath;
+        StateHasChanged();
+    }
+}
