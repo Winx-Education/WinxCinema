@@ -8,24 +8,76 @@
 @using System.Text.Json
 @using System.Text
 @using Winx_Cinema.Shared.Dtos
-<div class="d-flex flex-column align-items-center">
-    <MudPaper Class="pa-4" Style="width: 500px">
-        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+
+<style>
+    .login-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #e0f7fa;
+    }
+
+    .login-paper {
+        padding: 2rem;
+        width: 100%;
+        max-width: 400px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-top: 6px solid #00796b;
+    }
+
+    .login-form {
+        width: 100%;
+    }
+
+    .login-button {
+        margin-top: 1rem;
+        width: 100%;
+        background-color: #00796b;
+        color: #ffffff;
+    }
+
+        .login-button:hover {
+            background-color: #004d40;
+        }
+
+    .error-message {
+        color: #d32f2f;
+        font-size: 0.875rem;
+    }
+
+    .login-input {
+        margin-bottom: 1rem;
+    }
+
+        .login-input input {
+            border: 1px solid #00796b;
+            border-radius: 4px;
+        }
+
+        .login-input label {
+            color: #00796b;
+        }
+</style>
+
+<div class="login-container">
+    <MudPaper Class="login-paper">
+        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" Class="login-form">
             <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
-                          Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" @ref="email" />
-            <MudText class="text-danger">@errorMessageforEmail</MudText>
+                          Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" @ref="email" Class="login-input" />
+            <MudText Class="error-message">@errorMessageforEmail</MudText>
             <MudTextField T="string" Label="Password" @ref="pwField1"
                           InputType="InputType.Password"
                           Required="true"
-                          RequiredError="Password is required!" />
-            <MudText class="text-danger">@passwordIsNotCorrect</MudText>
-            <div class="d-flex align-center justify-space-between">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" OnClick="onLogin" Class="ml-auto mt-2">Login</MudButton>
-            </div>
+                          RequiredError="Password is required!" Class="login-input" />
+            <MudText Class="error-message">@passwordIsNotCorrect</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" OnClick="onLogin" Class="login-button">Login</MudButton>
         </MudForm>
     </MudPaper>
 </div>
-
 
 @code {
     bool success;
@@ -42,10 +94,10 @@
         {
             var client = httpClientFactory.CreateClient("localhost");
             var newUser = new LoginDto
-            {
-                Password = pwField1.Value,
-                Email = email.Value,
-            };
+                {
+                    Password = pwField1.Value,
+                    Email = email.Value,
+                };
 
             using StringContent jsonContent = new(
                 JsonSerializer.Serialize(newUser),
@@ -78,5 +130,4 @@
             }
         }
     }
-
 }
