@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Winx_Cinema.Data;
@@ -11,9 +12,11 @@ using Winx_Cinema.Data;
 namespace Winx_Cinema.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240520211028_final-migration")]
+    partial class finalmigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,22 +49,6 @@ namespace Winx_Cinema.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "e7df795b-97bd-40fe-b7bc-2a908b1a61e9",
-                            ConcurrencyStamp = "e7df795b-97bd-40fe-b7bc-2a908b1a61e9",
-                            Name = "ordinaryUser",
-                            NormalizedName = "ORDINARYUSER"
-                        },
-                        new
-                        {
-                            Id = "06b7173c-4e2e-4496-868b-811f09e34f14",
-                            ConcurrencyStamp = "06b7173c-4e2e-4496-868b-811f09e34f14",
-                            Name = "adminUser",
-                            NormalizedName = "ADMINUSER"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

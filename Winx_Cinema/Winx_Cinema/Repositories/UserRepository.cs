@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using Winx_Cinema.Data;
 using Winx_Cinema.Interfaces;
@@ -48,7 +49,7 @@ namespace Winx_Cinema.Repositories
                 };
             }
 
-            var token = GenerateJwtToken(user);
+            var token = await GenerateJwtToken(user);
 
             var newUser = mapper.Map<UserDto>(user);
 
@@ -60,16 +61,23 @@ namespace Winx_Cinema.Repositories
             };
         }
 
-        private string GenerateJwtToken(User user)
+        private async Task<string> GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
             var keyStr = _configuration["Jwt:Key"] ?? throw new ConfigurationMissingException();
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr));
 
+            var roles = await userManager.GetRolesAsync(user);
+            var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Subject = new ClaimsIdentity(Array.Empty<Claim>()),
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    roleClaims[0]
+                }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512),
             };
@@ -106,7 +114,9 @@ namespace Winx_Cinema.Repositories
                 SecondName = model.SecondName,
                 UserName = model.UserName,
             };
+
             var result = await userManager.CreateAsync(user, model.Password);
+            result = await userManager.AddToRoleAsync(user, "ordinaryUser");
 
             if (result.Succeeded)
             {

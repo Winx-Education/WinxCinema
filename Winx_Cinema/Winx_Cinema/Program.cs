@@ -32,6 +32,7 @@ builder.Services.AddScoped<IHallRepository, HallRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICookie, Cookie>();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -65,6 +66,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr))
     };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("adminUser", policy => policy.RequireRole("adminUser"));
 });
 
 builder.Services.Configure<IdentityOptions>(options =>
@@ -108,6 +114,7 @@ app.UseAntiforgery();
 
 app.MapControllers();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorComponents<App>()

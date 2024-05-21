@@ -1,4 +1,10 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using System.IdentityModel.Tokens.Jwt
+@using Winx_Cinema.Interfaces
+@inject ICookie cookie
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Winx_Cinema</a>
     </div>
@@ -25,11 +31,42 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="login">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
+        @if (Role == "adminUser")
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="admin">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Admin
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
+@code {
+    public string Role { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Ініціалізація, що не потребує JavaScript interop
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Виконання JavaScript interop тільки після першого рендерингу
+            string token = await cookie.GetValue("Token");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token);
+                var tokenS = jsonToken as JwtSecurityToken;
+
+                var role = tokenS?.Claims.FirstOrDefault(claim => claim.Type == "Role")?.Value;
+                Role = role;
+                StateHasChanged(); // Оновлення інтерфейсу після зміни стану
+            }
+        }
+    }
+}

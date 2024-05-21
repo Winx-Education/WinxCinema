@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Winx_Cinema.Interfaces;
 using Winx_Cinema.Shared.Dtos;
@@ -51,6 +52,7 @@ namespace Winx_Cinema.Controllers
 
         // PUT: api/Films/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "adminUser")]
         public async Task<IActionResult> PutFilm(Guid id, NewFilmDto dto)
         {
             var film = _mapper.Map<Film>(dto);
@@ -65,6 +67,7 @@ namespace Winx_Cinema.Controllers
 
         // POST: api/Films
         [HttpPost]
+        [Authorize(Roles = "adminUser")]
         public async Task<ActionResult<FilmDto>> PostFilm(NewFilmDto dto)
         {
             var film = _mapper.Map<Film>(dto);
@@ -75,6 +78,7 @@ namespace Winx_Cinema.Controllers
 
         [HttpPost]
         [Route("upload")]
+        [Authorize(Roles = "adminUser")]
         public async Task<IActionResult> uploadImage(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -95,6 +99,7 @@ namespace Winx_Cinema.Controllers
 
         // DELETE: api/Films/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "adminUser")]
         public async Task<IActionResult> DeleteFilm(Guid id)
         {
             if (!await _repository.Delete(id))

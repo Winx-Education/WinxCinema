@@ -1,5 +1,8 @@
-﻿@using Winx_Cinema.Shared.Dtos
+﻿@using System.Net.Http.Headers
+@using Winx_Cinema.Interfaces
+@using Winx_Cinema.Shared.Dtos
 @inject IHttpClientFactory httpClientFactory;
+@inject ICookie cookie
 
 @if (displayAddForm && !displayUpdateForm)
 {
@@ -80,11 +83,24 @@ else
     private async Task deleteFilm(Guid Id)
     {
         var client = httpClientFactory.CreateClient("localhost");
+        var token = await cookie.GetValue("Token");
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"api/Films/{Id}");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await client.DeleteAsync($"api/Films/{Id}");
 
-        films = films.Where(x => x.Id != Id);
+        var response = await client.SendAsync(request);
+        Console.WriteLine(response.StatusCode);
+        films = films.Where(x => x.Id != Id).ToList();
         StateHasChanged();
+        if (response.IsSuccessStatusCode)
+        {
+            films = films.Where(x => x.Id != Id).ToList();
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("Error deleting the film");
+        }
     }
 
     private void updateFilm(Guid Id, string title, string description, string genre, string director, string cast, string trailerPath, TimeSpan? Duration, int rating, DateTime? ReleaseDate, string picturePath)

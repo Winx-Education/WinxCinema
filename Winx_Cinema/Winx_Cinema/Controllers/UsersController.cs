@@ -60,7 +60,14 @@ namespace Winx_Cinema.Controllers
             switch (result.LoginResults)
             {
                 case LoginRegisterResults.Ok:
-                    return Ok(result);
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Expires = DateTime.UtcNow.AddHours(1) // або встановіть інший час закінчення
+                    };
+                    Response.Cookies.Append("AuthToken", result.Token, cookieOptions);
+
+                    return Ok(new { Token = result.Token });
                 default:
                     return BadRequest(result);
             }

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Winx_Cinema.Interfaces;
 using Winx_Cinema.Shared.Dtos;
@@ -49,6 +50,7 @@ namespace Winx_Cinema.Controllers
 
         // PUT: api/Halls/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "adminUser")]
         public async Task<IActionResult> PutHall(Guid id, NewHallDto dto)
         {
             var hall = _mapper.Map<Hall>(dto);
@@ -62,6 +64,7 @@ namespace Winx_Cinema.Controllers
 
         // POST: api/Halls
         [HttpPost]
+        [Authorize(Roles = "adminUser")]
         public async Task<ActionResult<HallDto>> PostHall(NewHallDto dto)
         {
             var hall = _mapper.Map<Hall>(dto);
@@ -72,6 +75,7 @@ namespace Winx_Cinema.Controllers
 
         // DELETE: api/Halls/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "adminUser")]
         public async Task<IActionResult> DeleteHall(Guid id)
         {
             if (!await _repository.Delete(id))
